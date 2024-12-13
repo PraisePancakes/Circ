@@ -331,13 +331,9 @@ namespace CircCFGInterp {
 
 	class Interpreter : public ExpressionVisitor {
 		typedef std::pair<std::string, std::any> PairType;
-		std::map<std::string, std::any> env;
-
 	public:
-		
-
+		std::map<std::string, std::any> env;
 		Interpreter(const std::string& cfg_path) {
-			
 			Lexer l(cfg_path);
 			Parser p(l.tokens);
 			for (auto& node : p.ast) {

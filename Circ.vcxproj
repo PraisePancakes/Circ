@@ -136,8 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Circ\include\CFGINTERP\interp.hpp" />
-    <ClInclude Include="Circ\include\Point.hpp" />
-    <ClInclude Include="Circ\include\PointPlotter.hpp" />
+    <ClInclude Include="Circ\include\CFGLoader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
