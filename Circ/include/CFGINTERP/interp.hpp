@@ -16,7 +16,9 @@ namespace CircCFGInterp {
 		TOK_NUM,
 		TOK_COL,
 		TOK_ENTRY,
-		TOK_DOLLA, 
+		TOK_DOLLA,
+		TOK_LCURL,
+		TOK_RCURL,
 		TOK_EOF
 	};
 
@@ -125,6 +127,12 @@ namespace CircCFGInterp {
 				break;
 			case '$' :
 				add_token(TOK_DOLLA);
+				break;
+			case '{' :
+				add_token(TOK_LCURL);
+				break;
+			case '}' :
+				add_token(TOK_RCURL);
 				break;
 			case '\n':
 				line++;
@@ -241,6 +249,8 @@ namespace CircCFGInterp {
 		};
 		~Literal() {};
 	};
+
+	
 
 
 

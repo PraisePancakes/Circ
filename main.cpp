@@ -17,13 +17,10 @@ int main() {
 
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
-    auto w = CFGAttr<double>("window_width", cfgl.interp);
-    auto h = CFGAttr<double>("window_height", cfgl.interp);
-    auto t = CFGAttr<std::string>("window_title", cfgl.interp);
-
+  
     auto clear_screen = CFGAttr<double>("background_color", cfgl.interp);
-
-    InitWindow(w,h,t.data());
+    CircInitWindow(cfgl.interp);
+    
 
     while (!WindowShouldClose()) {
         ClearBackground((Color)clear_screen);
