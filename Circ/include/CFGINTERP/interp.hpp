@@ -19,6 +19,14 @@ namespace CircCFGInterp {
 		TOK_DOLLA,
 		TOK_LCURL,
 		TOK_RCURL,
+		TOK_LPAREN,
+		TOK_RPAREN,
+		TOK_PLUS,
+		TOK_MINUS,
+		TOK_DIV,
+		TOK_STAR,
+		TOK_BANG,
+		TOK_MOD,
 		TOK_EOF
 	};
 
@@ -128,11 +136,32 @@ namespace CircCFGInterp {
 			case '$' :
 				add_token(TOK_DOLLA);
 				break;
+			case '+' :
+				add_token(TOK_PLUS);
+				break;
+			case '-':
+				add_token(TOK_MINUS);
+				break;
+			case '!':
+				add_token(TOK_BANG);
+				break;
+			case '*':
+				add_token(TOK_STAR);
+				break;
 			case '{' :
 				add_token(TOK_LCURL);
 				break;
 			case '}' :
 				add_token(TOK_RCURL);
+				break;
+			case '(' :
+				add_token(TOK_LPAREN);
+				break;
+			case ')' :
+				add_token(TOK_RPAREN);
+				break;
+			case '%':
+				add_token(TOK_MOD);
 				break;
 			case '\n':
 				line++;
@@ -154,6 +183,9 @@ namespace CircCFGInterp {
 					if (is_end()) {
 						throw std::runtime_error("multiline comment missing closing symbol");
 					}
+				}
+				else {
+					add_token(TOK_DIV);
 				}
 				break;
 			case '\"' :
@@ -212,8 +244,12 @@ namespace CircCFGInterp {
 	};
 
 	struct Literal;
-	struct Assignment;
+	struct Assignment; 
+	
+	struct Binary;
+	struct Unary;
 	struct ExpressionVisitor;
+	
 
 	struct BaseExpression {
 		BaseExpression() {};
@@ -229,6 +265,7 @@ namespace CircCFGInterp {
 	struct ExpressionVisitor {
 		virtual std::any visitLiteral(Literal* l) const = 0;
 		virtual std::any visitAssignment(Assignment* a) const = 0;
+		virtual std::any visitBinary(Binary* b) const = 0;
 
 	};
 	struct Assignment : public BaseExpression {
@@ -251,6 +288,22 @@ namespace CircCFGInterp {
 	};
 
 	
+	struct Binary : public BaseExpression {
+		BaseExpression* l;
+		TokenType op;
+		BaseExpression* r;
+
+		Binary(BaseExpression* l, TokenType op, BaseExpression* r) : l(l), op(op), r(r) {};
+		std::any accept(const ExpressionVisitor& v) override {
+			return v.visitBinary(this);
+		};
+		~Binary() {};
+	};
+
+	struct Unary : public BaseExpression {
+			
+
+	};
 
 
 
@@ -297,12 +350,26 @@ namespace CircCFGInterp {
 				
 				return new Literal(parser_previous().lit);
 			}
+
+			throw std::runtime_error("Expected a primary expression.");
+		};
+		//grouping : $window_width : (a + b) - c #
+		BaseExpression* binary() {
+			BaseExpression* left = primary();
+			while (match({ TOK_PLUS, TOK_MINUS, TOK_DIV, TOK_STAR, TOK_MOD })) {
+				TokenType t = parser_previous().t;
+				BaseExpression* r = primary();
+				
+				return new Binary(left, t, r);
+			}
+
+			return left;
 		};
 
 		BaseExpression* var() {
 			std::string key = advance().word;
-			if (match({ TOK_COL })) {
-				BaseExpression* value = primary();
+			while (match({ TOK_COL })) {
+				BaseExpression* value = binary();
 				if (!match({ TOK_HASH })) {
 					throw std::runtime_error("Missing #");
 				}
@@ -346,6 +413,7 @@ namespace CircCFGInterp {
 		Interpreter(const std::string& cfg_path) {
 			Lexer l(cfg_path);
 			Parser p(l.tokens);
+			
 			for (auto& node : p.ast) {
 				auto e = evaluate(node);
 				PairType pair = std::any_cast<PairType>(e);
@@ -356,7 +424,7 @@ namespace CircCFGInterp {
 				//}
 			}
 			
-
+		
 		};
 
 		std::any evaluate(BaseExpression* e) const {
@@ -378,6 +446,27 @@ namespace CircCFGInterp {
 			
 			return pair;
 		};
+
+		std::any visitBinary(Binary* b) const override {
+			std::any l = evaluate(b->l);
+			std::any r = evaluate(b->r);
+			TokenType op = b->op;
+			
+			switch (op) {
+			case TOK_PLUS :
+				if (l.type() == typeid(double) && r.type() == typeid(double)) {
+					
+					double left = std::any_cast<double>(l);
+					double right = std::any_cast<double>(r);
+					
+					return left + right;
+				}
+				break;
+			}
+			
+
+			return nullptr;
+		}
 
 		std::any visitLiteral(Literal* l) const override {
 			if (l->lit.type() == typeid(double)) {
