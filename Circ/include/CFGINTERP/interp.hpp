@@ -447,12 +447,24 @@ namespace CircCFGInterp {
 			return pair;
 		};
 
-		template<typename Type>
-		class BinAdapter {
+		template<typename PolicyType>
+		class IBinaryPolicy {
+			PolicyType a;
+			typedef PolicyType::Type Type;
 		public:
-			BinAdapter() {
+			IBinaryPolicy() {
+				
 			};
 			Type evaluate_binary(std::any l, TokenType op, std::any r) {
+				return a.evaluate(l, op, r);
+			}
+			~IBinaryPolicy() {};
+		};
+
+		struct BDouble {
+			using Type = double;
+			BDouble() {};
+			Type evaluate(std::any l, TokenType op, std::any r) {
 				Type left = std::any_cast<Type>(l);
 				Type right = std::any_cast<Type>(r);
 				switch (op) {
@@ -468,11 +480,28 @@ namespace CircCFGInterp {
 					return (int)left % (int)right;
 
 				};
-			}
-			~BinAdapter() {};
+			};
+			~BDouble() {};
 		};
 
-		
+		struct BString {
+			using Type = std::string;
+			BString() = default;
+			Type evaluate(std::any l, TokenType op, std::any r) {
+				Type left = std::any_cast<Type>(l);
+				Type right = std::any_cast<Type>(r);
+
+				switch (op) {
+				case TOK_PLUS:
+					return left + right;
+				default:
+					throw std::runtime_error("invalid binary operation.");
+				};
+
+			};
+			~BString() = default;
+		};
+
 		
 
 		std::any visitBinary(Binary* b) const override {
@@ -481,21 +510,16 @@ namespace CircCFGInterp {
 			TokenType op = b->op;
 			
 				if (l.type() == typeid(double) && r.type() == typeid(double)) {
-					BinAdapter<double> d;
+					IBinaryPolicy<BDouble> d;
 					return d.evaluate_binary(l, op, r);
 				}
 
 				if (l.type() == typeid(std::string) && r.type() == typeid(std::string)) {
-					BinAdapter<std::string> s;
+					IBinaryPolicy<BString> s;
 					return s.evaluate_binary(l, op, r);
 				
 				}
 
-				if (l.type() == typeid(char) && r.type() == typeid(char)) {
-					BinAdapter<char> s;
-					return s.evaluate_binary(l, op, r);
-
-				}
 			
 
 			return nullptr;
