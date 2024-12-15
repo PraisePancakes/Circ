@@ -245,7 +245,6 @@ namespace CircCFGInterp {
 
 	struct Literal;
 	struct Assignment; 
-	
 	struct Binary;
 	struct Unary;
 	struct ExpressionVisitor;
@@ -266,6 +265,7 @@ namespace CircCFGInterp {
 		virtual std::any visitLiteral(Literal* l) const = 0;
 		virtual std::any visitAssignment(Assignment* a) const = 0;
 		virtual std::any visitBinary(Binary* b) const = 0;
+		virtual std::any visitUnary(Unary* u) const = 0;
 
 	};
 	struct Assignment : public BaseExpression {
@@ -301,13 +301,15 @@ namespace CircCFGInterp {
 	};
 
 	struct Unary : public BaseExpression {
-			
-
+		TokenType op;
+		BaseExpression* r;
+		Unary(TokenType o, BaseExpression* r) : op(o), r(r) {};
+		std::any accept(const ExpressionVisitor& v) override {
+			return v.visitUnary(this);
+		}
+		~Unary() {};
 	};
 
-
-
-	
 
 	class Parser {
 		typedef std::size_t TokenIndex;
@@ -320,7 +322,9 @@ namespace CircCFGInterp {
 
 		
 		bool check(TokenType t) {
-			
+			if (is_end())
+				return false;
+
 			return tokens[curr].t == t;
 		}
 
@@ -347,29 +351,56 @@ namespace CircCFGInterp {
 
 		BaseExpression* primary() {
 			if (match({ TOK_STRING, TOK_NUM })) {
-				
 				return new Literal(parser_previous().lit);
 			}
-
+			
 			throw std::runtime_error("Expected a primary expression.");
 		};
-		//grouping : $window_width : (a + b) - c #
-		BaseExpression* binary() {
-			BaseExpression* left = primary();
-			while (match({ TOK_PLUS, TOK_MINUS, TOK_DIV, TOK_STAR, TOK_MOD })) {
+
+		BaseExpression* unary() {
+			
+			if (match({ TOK_BANG, TOK_MINUS })) {
+				
 				TokenType t = parser_previous().t;
 				BaseExpression* r = primary();
-				
-				return new Binary(left, t, r);
+				return new Unary(t, r);
+			}
+			return primary();
+		};
+		//grouping : $window_width : (a + b) - c #
+
+
+	
+
+		BaseExpression* factor() {
+			BaseExpression* left = unary();
+			while (match({ TOK_DIV, TOK_STAR, TOK_MOD })) {
+
+				TokenType t = parser_previous().t;
+				BaseExpression* r = unary();
+
+				left = new Binary(left, t, r);
 			}
 
 			return left;
 		};
 
+		BaseExpression* term() {
+			
+			BaseExpression* left = factor();
+			while (match({ TOK_PLUS, TOK_MINUS })) {
+				TokenType t = parser_previous().t;
+				BaseExpression* r = factor();
+				left = new Binary(left, t, r);
+			}
+
+			return left;
+		}
+
 		BaseExpression* var() {
 			std::string key = advance().word;
 			while (match({ TOK_COL })) {
-				BaseExpression* value = binary();
+				BaseExpression* value = term();
 				if (!match({ TOK_HASH })) {
 					throw std::runtime_error("Missing #");
 				}
@@ -402,58 +433,14 @@ namespace CircCFGInterp {
 		~Parser() {};
 	};
 
-
-
-	
-
-	class Interpreter : public ExpressionVisitor {
-		typedef std::pair<std::string, std::any> PairType;
-	public:
-		std::map<std::string, std::any> env;
-		Interpreter(const std::string& cfg_path) {
-			Lexer l(cfg_path);
-			Parser p(l.tokens);
-			
-			for (auto& node : p.ast) {
-				auto e = evaluate(node);
-				PairType pair = std::any_cast<PairType>(e);
-				env[pair.first] = pair.second;
-				//std::cout << pair.first << std::endl;
-				//if (pair.second.type() == typeid(double)) {
-					//std::cout << std::any_cast<double>(pair.second) << std::endl;
-				//}
-			}
-			
-		
-		};
-
-		std::any evaluate(BaseExpression* e) const {
-			return e->accept(*this);
-		};
-
-		
-		std::any Get(const std::string& key) {
-			std::any e = env[key];
-			return e;
-		};
-		
-
-		std::any visitAssignment(Assignment* a) const override {
-			std::pair<std::string, std::any> pair;
-			pair.first = a->key;
-			pair.second = evaluate(a->value);
-			
-			
-			return pair;
-		};
-
+	namespace Internal {
 		template<typename PolicyType>
 		class IBinaryPolicy {
 			PolicyType a;
 			typedef PolicyType::Type Type;
 		public:
 			IBinaryPolicy() {
-				
+
 			};
 			Type evaluate_binary(std::any l, TokenType op, std::any r) {
 				return a.evaluate(l, op, r);
@@ -501,8 +488,60 @@ namespace CircCFGInterp {
 			};
 			~BString() = default;
 		};
+	}
+
+	
+
+	class Interpreter : public ExpressionVisitor {
+		typedef std::pair<std::string, std::any> PairType;
+
+		bool is_truthy(std::any obj) {
+			if (!obj.has_value()) {
+				if (obj.type() == typeid(bool)) {
+					return std::any_cast<bool>(obj);
+				}
+			};
+			return false;
+		}
+	public:
+		std::map<std::string, std::any> env;
+		Interpreter(const std::string& cfg_path) {
+			Lexer l(cfg_path);
+			Parser p(l.tokens);
+			
+			for (auto& node : p.ast) {
+				auto e = evaluate(node);
+				PairType pair = std::any_cast<PairType>(e);
+				env[pair.first] = pair.second;
+				//std::cout << pair.first << std::endl;
+				//if (pair.second.type() == typeid(double)) {
+					//std::cout << std::any_cast<double>(pair.second) << std::endl;
+				//}
+			}
+			
+		
+		};
+
+		std::any evaluate(BaseExpression* e) const {
+			return e->accept(*this);
+		};
 
 		
+		std::any Get(const std::string& key) {
+			std::any e = env[key];
+			return e;
+		};
+		
+
+		std::any visitAssignment(Assignment* a) const override {
+			std::pair<std::string, std::any> pair;
+			pair.first = a->key;
+			pair.second = evaluate(a->value);
+			
+			
+			return pair;
+		};
+
 
 		std::any visitBinary(Binary* b) const override {
 			std::any l = evaluate(b->l);
@@ -510,17 +549,26 @@ namespace CircCFGInterp {
 			TokenType op = b->op;
 			
 				if (l.type() == typeid(double) && r.type() == typeid(double)) {
-					IBinaryPolicy<BDouble> d;
+					Internal::IBinaryPolicy<Internal::BDouble> d;
 					return d.evaluate_binary(l, op, r);
 				}
 
 				if (l.type() == typeid(std::string) && r.type() == typeid(std::string)) {
-					IBinaryPolicy<BString> s;
+					Internal::IBinaryPolicy<Internal::BString> s;
 					return s.evaluate_binary(l, op, r);
 				
 				}
 
 			
+
+			return nullptr;
+		}
+
+		std::any visitUnary(Unary* u) const override {
+			
+			std::any r = evaluate(u->r);
+			
+
 
 			return nullptr;
 		}
