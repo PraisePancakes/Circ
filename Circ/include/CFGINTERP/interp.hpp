@@ -447,22 +447,55 @@ namespace CircCFGInterp {
 			return pair;
 		};
 
+		template<typename Type>
+		class BinAdapter {
+		public:
+			BinAdapter() {
+			};
+			Type evaluate_binary(std::any l, TokenType op, std::any r) {
+				Type left = std::any_cast<Type>(l);
+				Type right = std::any_cast<Type>(r);
+				switch (op) {
+				case TOK_PLUS:
+					return left + right;
+				case TOK_MINUS:
+					return left - right;
+				case TOK_DIV:
+					return left / right;
+				case TOK_STAR:
+					return left * right;
+				case TOK_MOD:
+					return (int)left % (int)right;
+
+				};
+			}
+			~BinAdapter() {};
+		};
+
+		
+		
+
 		std::any visitBinary(Binary* b) const override {
 			std::any l = evaluate(b->l);
 			std::any r = evaluate(b->r);
 			TokenType op = b->op;
 			
-			switch (op) {
-			case TOK_PLUS :
 				if (l.type() == typeid(double) && r.type() == typeid(double)) {
-					
-					double left = std::any_cast<double>(l);
-					double right = std::any_cast<double>(r);
-					
-					return left + right;
+					BinAdapter<double> d;
+					return d.evaluate_binary(l, op, r);
 				}
-				break;
-			}
+
+				if (l.type() == typeid(std::string) && r.type() == typeid(std::string)) {
+					BinAdapter<std::string> s;
+					return s.evaluate_binary(l, op, r);
+				
+				}
+
+				if (l.type() == typeid(char) && r.type() == typeid(char)) {
+					BinAdapter<char> s;
+					return s.evaluate_binary(l, op, r);
+
+				}
 			
 
 			return nullptr;

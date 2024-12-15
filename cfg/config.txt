@@ -2,7 +2,7 @@
 ::
 $window_title     :  "Circ"  # 
 $background_color :   400    #
-$window_width     :   800 + 900   # 
+$window_width     :   800    # 
 $window_height	  :   800    # 
 $point_radius     :   20     #
 $circle_radius    :   50     #
