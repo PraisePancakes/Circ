@@ -177,12 +177,16 @@ namespace CircCFGInterp {
 				}
 				else if (peek() == '*') {
 					advance();
-					while (peek() != '*' && peek_next() != '\\' && !is_end()) {
+					while ((peek() != '*' && peek_next() != '/' && !is_end())) {
 						advance();
 					}
+					advance();
+					advance();
+
 					if (is_end()) {
 						throw std::runtime_error("multiline comment missing closing symbol");
 					}
+
 				}
 				else {
 					add_token(TOK_DIV);
@@ -317,7 +321,7 @@ namespace CircCFGInterp {
 		TokenIndex curr;
 		
 		bool is_end() const {
-			return curr > tokens.size();
+			return tokens[curr].t == TOK_EOF;
 		}
 
 		
@@ -398,22 +402,24 @@ namespace CircCFGInterp {
 		}
 
 		BaseExpression* var() {
-			std::string key = advance().word;
-			while (match({ TOK_COL })) {
+			while (match({ TOK_DOLLA })) {
+				std::string key = advance().word;
+				if (!match({ TOK_COL })) {
+					throw std::runtime_error("Missing ':'");
+				}
 				BaseExpression* value = term();
 				if (!match({ TOK_HASH })) {
-					throw std::runtime_error("Missing #");
+					throw std::runtime_error("Missing '#'");
 				}
 				return new Assignment(key, value);
 			}
-			throw std::runtime_error("Missing Colon");
 		};
 
 		std::vector<BaseExpression*> parse() {
 			std::vector<BaseExpression*> ast;
-			while (match({ TOK_DOLLA })) {
-				
+			while (!is_end()) {
 				ast.push_back(var());
+			
 			}
 			return ast;
 		};
@@ -424,6 +430,7 @@ namespace CircCFGInterp {
 			
 			if (match({ TOK_ENTRY })) {
 				ast = parse();
+
 			}
 			else {
 				throw std::runtime_error("CFG ENTRY NOT FOUND");

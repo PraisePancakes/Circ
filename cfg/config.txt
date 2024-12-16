@@ -6,6 +6,6 @@ $window_width     :   800 - 100 + 200  #
 $window_height	  :   800    # 
 $point_radius     :   20     #
 $circle_radius    :   50     #
-/* 
-	this is a test
-*/
+
+/* this doesnt */
+//this works
