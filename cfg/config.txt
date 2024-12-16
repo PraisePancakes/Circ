@@ -2,10 +2,10 @@
 ::
 $window_title     :  "Circ"  # 
 $background_color :   400    #
-$window_width     :   800 - 100 + 200  # 
+$window_width     :   800 - 100 + 200  #
 $window_height	  :   800    # 
 $point_radius     :   20     #
 $circle_radius    :   50     #
-
-/* this doesnt */
-//this works
+$object : { $t : 1#
+			$b : 2#
+		  } #

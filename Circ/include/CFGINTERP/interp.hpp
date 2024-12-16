@@ -251,6 +251,7 @@ namespace CircCFGInterp {
 	struct Assignment; 
 	struct Binary;
 	struct Unary;
+	struct Object;
 	struct ExpressionVisitor;
 	
 
@@ -270,6 +271,7 @@ namespace CircCFGInterp {
 		virtual std::any visitAssignment(Assignment* a) const = 0;
 		virtual std::any visitBinary(Binary* b) const = 0;
 		virtual std::any visitUnary(Unary* u) const = 0;
+		virtual std::any visitObject(Object* u) const = 0;
 
 	};
 	struct Assignment : public BaseExpression {
@@ -312,6 +314,15 @@ namespace CircCFGInterp {
 			return v.visitUnary(this);
 		}
 		~Unary() {};
+	};
+
+	struct Object : public BaseExpression {
+		std::map<std::string, BaseExpression*> members;
+		Object(std::map<std::string, BaseExpression*> m) : members(m) {};
+		std::any accept(const ExpressionVisitor& v) override {
+			return v.visitObject(this);
+		}
+		~Object() {};
 	};
 
 
@@ -357,6 +368,11 @@ namespace CircCFGInterp {
 			if (match({ TOK_STRING, TOK_NUM })) {
 				return new Literal(parser_previous().lit);
 			}
+
+			if (match({ TOK_LCURL })) {
+			
+				return obj();
+			}
 			
 			throw std::runtime_error("Expected a primary expression.");
 		};
@@ -374,7 +390,22 @@ namespace CircCFGInterp {
 		//grouping : $window_width : (a + b) - c #
 
 
-	
+		BaseExpression* obj() {
+			std::map<std::string, BaseExpression*> members;
+			
+			while (!match({ TOK_RCURL })) {
+				BaseExpression* v = var();
+				Assignment* a = (Assignment*)v;
+				std::string key = a->key;
+				Literal* l = (Literal*)a->value;
+				
+				members[key] = l;
+				
+			}
+			
+			return new Object(members);
+
+		}
 
 		BaseExpression* factor() {
 			BaseExpression* left = unary();
@@ -400,7 +431,7 @@ namespace CircCFGInterp {
 
 			return left;
 		}
-
+		
 		BaseExpression* var() {
 			while (match({ TOK_DOLLA })) {
 				std::string key = advance().word;
@@ -547,6 +578,11 @@ namespace CircCFGInterp {
 			
 			
 			return pair;
+		};
+
+		std::any visitObject(Object* a) const override {
+		
+			return a->members;
 		};
 
 
