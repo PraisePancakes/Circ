@@ -18,8 +18,12 @@ int main() {
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
   
-    auto clear_screen = CFGAttr<double>("background_color", cfgl.interp);
-    CircInitWindow(cfgl.interp);
+    auto clear_screen = cfgl.CFGAttr<double>("background_color");
+
+    auto m = cfgl.CFGObj({ "object" , "pos"});
+    std::cout << std::any_cast<double>(m.at("x"));
+
+    cfgl.CircInitWindow();
     
 
     while (!WindowShouldClose()) {

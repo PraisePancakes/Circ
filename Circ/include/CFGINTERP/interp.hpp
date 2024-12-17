@@ -79,7 +79,10 @@ namespace CircCFGInterp {
 
 		void add_token(TokenType t, std::any lit) {
 			std::string word = this->contents.substr(start, end - start);
-			tokens.push_back(Token(word, line, pos, t, lit));
+			if (t == TOK_VAR) {
+				std::cout << word << std::endl;
+			}
+ 			tokens.push_back(Token(word, line, pos, t, lit));
 		}
 
 		void add_token(TokenType t) {
@@ -108,12 +111,13 @@ namespace CircCFGInterp {
 		};
 
 		void lex_var() {
-			std::string var = "";
-			var += advance();
+			
 			while (!is_end() && (isalnum(peek()) || peek() == '_')) {
-				var += advance();
-			};
 
+				char c = advance();
+				
+			};
+			
 			add_token(TOK_VAR);
 			
 		};
@@ -397,6 +401,7 @@ namespace CircCFGInterp {
 				BaseExpression* v = var();
 				Assignment* a = (Assignment*)v;
 				std::string key = a->key;
+				
 				Literal* l = (Literal*)a->value;
 				
 				members[key] = l;
@@ -435,6 +440,7 @@ namespace CircCFGInterp {
 		BaseExpression* var() {
 			while (match({ TOK_DOLLA })) {
 				std::string key = advance().word;
+				
 				if (!match({ TOK_COL })) {
 					throw std::runtime_error("Missing ':'");
 				}
@@ -528,6 +534,8 @@ namespace CircCFGInterp {
 		};
 	}
 
+
+	
 	
 
 	class Interpreter : public ExpressionVisitor {
@@ -551,6 +559,7 @@ namespace CircCFGInterp {
 				auto e = evaluate(node);
 				PairType pair = std::any_cast<PairType>(e);
 				env[pair.first] = pair.second;
+				//std::cout << pair.second.type().name() << "\n\n" << std::endl;
 				//std::cout << pair.first << std::endl;
 				//if (pair.second.type() == typeid(double)) {
 					//std::cout << std::any_cast<double>(pair.second) << std::endl;
@@ -569,6 +578,31 @@ namespace CircCFGInterp {
 			std::any e = env[key];
 			return e;
 		};
+		typedef std::map<std::string, std::any> MapType;
+
+		MapType recur(int &level, std::initializer_list<std::string> obj_key_path, const MapType& current_env) {
+			if (level >= obj_key_path.size()) {
+				return current_env;
+			}
+
+			std::string k = obj_key_path.begin()[level];
+			auto it = current_env.find(k);
+			
+			if (it == current_env.end()) {
+				throw std::runtime_error("Key '" + k + "' not found in the object.");
+			}
+
+			if (it->second.type() != typeid(MapType)) {
+				throw std::runtime_error("Key '" + k + "' does not contain an object.");
+			}
+
+			return recur(++level, obj_key_path, std::any_cast<MapType>(it->second));
+		}
+
+		std::map<std::string, std::any> GetObj(std::initializer_list<std::string> obj_key_path) {
+			int level = 0;
+			return recur(level, obj_key_path, env);
+		};
 		
 
 		std::any visitAssignment(Assignment* a) const override {
@@ -581,8 +615,12 @@ namespace CircCFGInterp {
 		};
 
 		std::any visitObject(Object* a) const override {
-		
-			return a->members;
+			std::map<std::string, std::any> members;
+			for (const auto& [key, value] : a->members) {
+				members[key] = evaluate(value);
+			}
+
+			return members;
 		};
 
 
@@ -608,10 +646,7 @@ namespace CircCFGInterp {
 		}
 
 		std::any visitUnary(Unary* u) const override {
-			
 			std::any r = evaluate(u->r);
-			
-
 
 			return nullptr;
 		}
