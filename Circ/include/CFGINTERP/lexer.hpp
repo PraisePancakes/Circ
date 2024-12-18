@@ -79,9 +79,7 @@ namespace CircCFGInterp {
 
 		void add_token(TokenType t, std::any lit) {
 			std::string word = this->contents.substr(start, end - start);
-			if (t == TOK_VAR) {
-				std::cout << word << std::endl;
-			}
+			
 			tokens.push_back(Token(word, line, pos, t, lit));
 		}
 

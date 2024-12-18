@@ -6,6 +6,8 @@ $window_width     :   800 - 100 + 200,
 $window_height	  :   800, 
 $point_radius     :   20,
 $circle_radius    :   50,
+$unary_bool : !(100 + 50),
+$unary_double : -(20 + 100),
 $object : { 
 			$pos : {
 					$x : 50,

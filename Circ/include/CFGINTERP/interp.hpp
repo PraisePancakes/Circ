@@ -70,13 +70,15 @@ namespace CircCFGInterp {
 	class Interpreter : public ExpressionVisitor {
 
 
-		bool is_truthy(std::any obj) {
+		bool is_truthy(std::any obj) const {
 			if (!obj.has_value()) {
-				if (obj.type() == typeid(bool)) {
-					return std::any_cast<bool>(obj);
-				}
+				return false;
 			};
-			return false;
+			if (obj.type() == typeid(bool)) {
+				return std::any_cast<bool>(obj);
+			}
+			
+			return true;
 		}
 		
 		std::any visitAssignment(Assignment* a) const override {
@@ -118,10 +120,28 @@ namespace CircCFGInterp {
 
 			return nullptr;
 		}
+		/*
+		!val
+		-val
+		!(val + val1)
+		-(val + val1)
+	
+		*/
+		std::any visitGrouping(Grouping* gr) const override {
+			return evaluate(gr->g);
+		}
 
 		std::any visitUnary(Unary* u) const override {
+			
 			std::any r = evaluate(u->r);
-
+			
+			if (u->op == TOK_BANG) {
+				return !(is_truthy(r));
+			}
+			if (u->op == TOK_MINUS) {
+				
+				return std::any_cast<double>(r) * -1;
+			}
 			return nullptr;
 		}
 

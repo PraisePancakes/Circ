@@ -53,40 +53,29 @@ namespace CircCFGInterp {
 
 				return obj();
 			}
-
+			if (match({ TOK_LPAREN })) {
+				BaseExpression* expr = term();
+				if (!match({ TOK_RPAREN })) {
+					
+					throw std::runtime_error("Missing ')'");
+				}
+				return new Grouping(expr);
+			}
 			throw std::runtime_error("Expected a primary expression.");
 		};
 
 		BaseExpression* unary() {
-
 			if (match({ TOK_BANG, TOK_MINUS })) {
-
 				TokenType t = parser_previous().t;
-				BaseExpression* r = primary();
+				BaseExpression* r = unary();
 				return new Unary(t, r);
 			}
 			return primary();
 		};
-		//grouping : $window_width : (a + b) - c #
+		//grouping : $window_width : (a + b) - c,
 
 
-		BaseExpression* obj() {
-			std::map<std::string, BaseExpression*> members;
-
-			while (!match({ TOK_RCURL })) {
-				BaseExpression* v = var();
-				Assignment* a = (Assignment*)v;
-				std::string key = a->key;
-
-				Literal* l = (Literal*)a->value;
-
-				members[key] = l;
-
-			}
-
-			return new Object(members);
-
-		}
+	
 
 		BaseExpression* factor() {
 			BaseExpression* left = unary();
@@ -113,6 +102,24 @@ namespace CircCFGInterp {
 			return left;
 		}
 
+		BaseExpression* obj() {
+			std::map<std::string, BaseExpression*> members;
+
+			while (!match({ TOK_RCURL })) {
+				BaseExpression* v = var();
+				Assignment* a = (Assignment*)v;
+				std::string key = a->key;
+
+				Literal* l = (Literal*)a->value;
+
+				members[key] = l;
+
+			}
+
+			return new Object(members);
+
+		}
+
 		BaseExpression* var() {
 			while (match({ TOK_DOLLA })) {
 				std::string key = advance().word;
@@ -130,6 +137,8 @@ namespace CircCFGInterp {
 				return new Assignment(key, value);
 			}
 		};
+
+
 
 		std::vector<BaseExpression*> parse() {
 			std::vector<BaseExpression*> ast;
