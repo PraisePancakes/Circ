@@ -21,6 +21,7 @@ namespace CircCFGInterp {
 		TOK_RCURL,
 		TOK_LPAREN,
 		TOK_RPAREN,
+		TOK_COMMA,
 		TOK_PLUS,
 		TOK_MINUS,
 		TOK_DIV,
@@ -145,6 +146,9 @@ namespace CircCFGInterp {
 				break;
 			case '-':
 				add_token(TOK_MINUS);
+				break;
+			case ',':
+				add_token(TOK_COMMA);
 				break;
 			case '!':
 				add_token(TOK_BANG);
@@ -445,9 +449,12 @@ namespace CircCFGInterp {
 					throw std::runtime_error("Missing ':'");
 				}
 				BaseExpression* value = term();
-				if (!match({ TOK_HASH })) {
-					throw std::runtime_error("Missing '#'");
+				if (!is_end()) {
+					if (!match({ TOK_COMMA })) {
+						throw std::runtime_error("Missing ','");
+					}
 				}
+				
 				return new Assignment(key, value);
 			}
 		};
