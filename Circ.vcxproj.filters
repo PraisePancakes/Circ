@@ -29,5 +29,17 @@
     <ClInclude Include="Circ\include\CFGINTERP\interp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\env.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\lexer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\expressions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\rdparser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

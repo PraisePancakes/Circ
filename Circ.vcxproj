@@ -135,7 +135,11 @@
     <Text Include="cfg\config.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Circ\include\CFGINTERP\env.hpp" />
+    <ClInclude Include="Circ\include\CFGINTERP\expressions.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\interp.hpp" />
+    <ClInclude Include="Circ\include\CFGINTERP\lexer.hpp" />
+    <ClInclude Include="Circ\include\CFGINTERP\rdparser.hpp" />
     <ClInclude Include="Circ\include\CFGLoader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

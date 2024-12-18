@@ -3,9 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "CFGINTERP/interp.hpp"
-
-
-
+#include "CFGINTERP/env.hpp"
 
 
 
@@ -16,11 +14,11 @@ namespace Circ {
    
     class CFGLoader {
     public:
-        CircCFGInterp::Interpreter* interp;
+       
+        CircCFGInterp::Env* env;
         CFGLoader(const std::string& cfg) {
-            interp = new CircCFGInterp::Interpreter(cfg);
-            CircCFGInterp::Interpreter::MapType m = CFGObj({ "object" });
-
+            CircCFGInterp::Interpreter* interp = new CircCFGInterp::Interpreter(cfg);
+            env = new CircCFGInterp::Env(interp);
         };
 
         void CircInitWindow() {
@@ -32,11 +30,11 @@ namespace Circ {
 
         template<typename WrapperType>
         WrapperType CFGAttr(const std::string& key) {
-            return std::any_cast<WrapperType>(interp->Get(key));
+            return std::any_cast<WrapperType>(env->Get(key));
         };
 
-        CircCFGInterp::Interpreter::MapType CFGObj(std::initializer_list<std::string> obj_path) {
-            return CircCFGInterp::Interpreter::MapType(interp->GetObj(obj_path));
+        CircCFGInterp::Env::MapType CFGObj(std::initializer_list<std::string> obj_path) {
+            return CircCFGInterp::Env::MapType(env->GetObj(obj_path));
         }
         ~CFGLoader() {};
     };
