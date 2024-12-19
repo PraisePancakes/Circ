@@ -8,7 +8,7 @@
 ## Usage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lets begin with the configuration language. Don't worry this is going to be an easy learn.
 ### Entry :
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each Circ file has an entry point. To denote this entry point, type ```::``` before the file's variables.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each Circ file has an entry point. To denote this entry point, type ```::``` before the file's variables. Following the entry point, create the entry object : ```{ }``` 
 ### Declaring a configuration variable :
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To assign a variable all you have to do is prefix the identifier with a ```$``` sign and assign it ```:``` to a value.
 A very simple file will look something like this.
@@ -20,15 +20,19 @@ so do these...
 
 //here is the entry token
 ::
+{
 $some_var : 5,
+}
 ```
 ### Different types :
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Circ currently supports three types of variables, double, string, and objects.
 ```
 ::
+{
 $double : 5,
 $str : "string",
 $obj : { $x : 1, $y : 2, }
+}
 ```
 Ok sweet! now we have some config variables, let's use them in some code!
 Starting off, let's create an instance of the API.
@@ -44,33 +48,42 @@ For Primary Data Types (PDTs) you can simply access a variable like so.
 double dbl_var = cfgl.CFGAttr<double>("double_variable");
 ```
 The CFGAttr function takes the type of the config variable as its template argument and the name of that variable as its function argument, this searches the Circ env for this variable and throws an exception if one isn't found. Ok cool, now how do we retrieve objects?
-Use CFGObj to retrieve an object. CFGObj returns a map of the objects members key-value pairs where the key is a string and the value can be any type.
 ```c++
-std::map<std::string, std::any> CFGObj(std::initializer_list<std::string> obj_path);
+        template<typename WrapperType>
+        WrapperType CFGAttr(std::initializer_list<std::string> key_path)
 ```
 This function takes a list of strings starting with the outer-most key to the inner most key of the object.
 For example given this Circ file :
 ```
-::
-$obj : {
-  $x : 1,  
-  $y : 2,
-  $inner : {
-    $ix : 3,
-    $iy : 4,
-  },
+:: {
+ $obj : {
+   $x : 1,  
+   $y : 2,
+   $inner : {
+     $ix : 3,
+     $iy : 4,
+   },
+ }
 }
 ```
 
-To retrieve the ```$inner``` object-key you can do so :
+To retrieve the ```$ix``` object-key you can do so :
 ```c++
-auto inner_map = cfgl.CFGObj({ "obj" , "inner"});
+double d = cfgl.CFGAttr<double>({"obj", "inner", "ix"});
 //retrieve $ix
-
-std::cout << std::any_cast<double>(inner_map.at("ix"));
+std::cout << d;
 
 ```
-That's it! Well... currently, I am still working hard every day to better this project.
+Circ provides a CircObject type to retrieve the objects themselves.
+```c++
+CircObject object = cfgl.CFGAttr<CircObject>({"obj", "inner"});
+std::map<std::string, std::any> members = object.members;
+for(auto& m : members) {
+ std::cout << m.first << std::endl;
+}
+```
+
+That's it! Well... for now, I am still working hard every day to better this project.
 ### IN THE WORKS 
  1. Easier object property retrieval.
  2. Using variable substitution for values.
