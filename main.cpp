@@ -16,8 +16,11 @@ int main() {
 
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
-    double d = cfgl.CFGAttr<double>({"obj", "x"});
-    std::cout << d;
+    CircObject* d = cfgl.CFGAttr<CircObject*>({"obj"});
+    
+
+   
+   
 
     return 0;
 }

@@ -1,16 +1,15 @@
 // @incorp CircMacs
 :: {
-$window_title     :  "Circ",
-$background_color :   400,
-$window_width     :   800 - 100 + 200,
-$window_height	  :   800, 
-$point_radius     :   20,
-$x : 6,
+$window_title     :  "Circ";
+$background_color :   400;
+$window_width     :   800 - 100 + 200;
+$window_height	  :   800;
+$point_radius     :   20;
+$x : 6;
 $obj : {
-	$x : 4,
-},
+	$x : 4;
+};
 $obj2 : {
-	$y : 0,
-},
+	$y : 0;
+};
 }
-

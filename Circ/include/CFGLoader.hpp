@@ -29,11 +29,13 @@ namespace Circ {
 
         template<typename WrapperType>
         WrapperType CFGAttr(std::initializer_list<std::string> key_path) {
+           
             CircCFGInterp::Environment* current = interp->level;
             std::any value;
 
             for (const auto& key : key_path) {
                 if (!current) {
+                   
                     throw std::runtime_error("Invalid key path: " + key);
                 }
 
@@ -46,12 +48,13 @@ namespace Circ {
                     current = nullptr; 
                 }
             }
-
+           
             // Cast the final value to the desired type
             if (value.has_value()) {
+                std::cout << value.type().name() << std::endl;
                 return std::any_cast<WrapperType>(value);
             }
-
+           
             throw std::runtime_error("Key path did not resolve to a valid value.");
         }
 

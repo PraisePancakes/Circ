@@ -26,6 +26,7 @@ namespace CircCFGInterp {
 		TOK_DIV,
 		TOK_STAR,
 		TOK_BANG,
+		TOK_SEMI,
 		TOK_MOD,
 		TOK_EOF
 	};
@@ -138,6 +139,9 @@ namespace CircCFGInterp {
 			case '$':
 				add_token(TOK_DOLLA);
 				break;
+			case ';':
+				add_token(TOK_SEMI);
+				break;
 			case '+':
 				add_token(TOK_PLUS);
 				break;
@@ -220,7 +224,13 @@ namespace CircCFGInterp {
 
 		void lex() {
 			while (!is_end()) {
-				lex_token();
+				try {
+					lex_token();
+				}
+				catch (std::exception& e) {
+					std::cerr << e.what() << std::endl;
+				}
+				
 				start = end;
 			}
 

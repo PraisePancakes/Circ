@@ -121,24 +121,33 @@ namespace CircCFGInterp {
 
 		}
 
-		BaseExpression* var() {
-			while (match({ TOK_DOLLA })) {
-				std::string key = advance().word;
-				
-				if (!match({ TOK_COL })) {
-					
-					throw std::runtime_error("Missing ':'");
-				}
-				BaseExpression* value = term();
-				if (!is_end()) {
-					if (!match({ TOK_COMMA })) {
-						
-						throw std::runtime_error("Missing ','");
-					}
-				}
+		Token parser_peek() const {
+			return tokens[curr];
+		}
 
-				return new Assignment(key, value);
+		BaseExpression* var() {
+			if (parser_peek().t == TOK_DOLLA) {
+				while (match({ TOK_DOLLA })) {
+					std::string key = advance().word;
+
+					if (!match({ TOK_COL })) {
+						throw std::runtime_error("Missing ':'");
+					}
+					BaseExpression* value = term();
+					if (!is_end()) {
+						if (!match({ TOK_SEMI })) {
+
+							throw std::runtime_error("Missing ';'");
+						}
+					}
+
+					return new Assignment(key, value);
+				}
 			}
+			else {
+				throw std::runtime_error("Variable declaration prefix '$' missing.");
+			}
+			
 		};
 
 
@@ -163,15 +172,20 @@ namespace CircCFGInterp {
 	public:
 		BaseExpression* ast;
 		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
+			try {
+				if (match({ TOK_ENTRY })) {
+					ast = parse();
 
-			if (match({ TOK_ENTRY })) {
-				ast = parse();
+				}
+				else {
 
+					throw std::runtime_error("CFG ENTRY NOT FOUND");
+				}
 			}
-			else {
-				
-				throw std::runtime_error("CFG ENTRY NOT FOUND");
+			catch (std::exception& e) {
+				std::cerr << e.what() << std::endl;
 			}
+			
 
 		};
 		~Parser() {};
