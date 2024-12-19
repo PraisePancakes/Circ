@@ -55,14 +55,15 @@ The CFGAttr function takes the type of the config variable as its template argum
 This function takes a list of strings starting with the outer-most key to the inner most key of the object.
 For example given this Circ file :
 ```
-::
-$obj : {
-  $x : 1,  
-  $y : 2,
-  $inner : {
-    $ix : 3,
-    $iy : 4,
-  },
+:: {
+ $obj : {
+   $x : 1,  
+   $y : 2,
+   $inner : {
+     $ix : 3,
+     $iy : 4,
+   },
+ }
 }
 ```
 
