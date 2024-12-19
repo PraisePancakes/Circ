@@ -61,6 +61,7 @@ namespace CircCFGInterp {
 				}
 				return new Grouping(expr);
 			}
+			
 			throw std::runtime_error("Expected a primary expression.");
 		};
 
@@ -109,7 +110,7 @@ namespace CircCFGInterp {
 				BaseExpression* v = var();
 				Assignment* a = (Assignment*)v;
 				std::string key = a->key;
-
+				
 				Literal* l = (Literal*)a->value;
 
 				members[key] = l;
@@ -123,13 +124,15 @@ namespace CircCFGInterp {
 		BaseExpression* var() {
 			while (match({ TOK_DOLLA })) {
 				std::string key = advance().word;
-
+				
 				if (!match({ TOK_COL })) {
+					
 					throw std::runtime_error("Missing ':'");
 				}
 				BaseExpression* value = term();
 				if (!is_end()) {
 					if (!match({ TOK_COMMA })) {
+						
 						throw std::runtime_error("Missing ','");
 					}
 				}
@@ -140,17 +143,25 @@ namespace CircCFGInterp {
 
 
 
-		std::vector<BaseExpression*> parse() {
-			std::vector<BaseExpression*> ast;
+		BaseExpression* parse() {
+			BaseExpression* ast = nullptr;
 			while (!is_end()) {
-				ast.push_back(var());
+				if (match({ TOK_LCURL })) {
+					
+					ast = obj();
+				}
+				else {
+				
+					throw std::runtime_error("Missing Entry '{'");
+				}
+				
 
 			}
 			return ast;
 		};
 
 	public:
-		std::vector<BaseExpression*> ast;
+		BaseExpression* ast;
 		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
 
 			if (match({ TOK_ENTRY })) {
@@ -158,6 +169,7 @@ namespace CircCFGInterp {
 
 			}
 			else {
+				
 				throw std::runtime_error("CFG ENTRY NOT FOUND");
 			}
 

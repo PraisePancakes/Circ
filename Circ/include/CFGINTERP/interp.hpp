@@ -1,6 +1,6 @@
 #pragma once
 #include "expressions.hpp"
-
+#include "env.hpp"
 #include "rdparser.hpp"
 
 namespace CircCFGInterp {
@@ -62,14 +62,14 @@ namespace CircCFGInterp {
 			~BString() = default;
 		};
 		
-		
 
 	}
 
+	
 
 	class Interpreter : public ExpressionVisitor {
 
-
+	
 		bool is_truthy(std::any obj) const {
 			if (!obj.has_value()) {
 				return false;
@@ -91,12 +91,15 @@ namespace CircCFGInterp {
 		};
 
 		std::any visitObject(Object* a) const override {
+			
 			std::map<std::string, std::any> members;
 			for (const auto& [key, value] : a->members) {
 				members[key] = evaluate(value);
 			}
-
-			return members;
+			Environment* env = new Environment(members);
+			env->outer = level;
+			level = env;
+			return env;
 		};
 
 
@@ -154,15 +157,16 @@ namespace CircCFGInterp {
 			}
 			return nullptr;
 		};
-		std::vector<BaseExpression*> ast;
+		BaseExpression* ast;
 	public:
-		
+		inline static Environment* level = nullptr;
 		Interpreter(const std::string& cfg_path) {
 			Lexer l(cfg_path);
 			Parser p(l.tokens);
-			ast = p.ast; 
+			ast = p.ast;
+			evaluate(ast);
 		};
-		std::vector<BaseExpression*> astree() const {
+		BaseExpression* astree() const {
 			return ast;
 		}
 		std::any evaluate(BaseExpression* e) const {

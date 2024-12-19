@@ -13,29 +13,49 @@
 namespace Circ {
    
     class CFGLoader {
+        CircCFGInterp::Interpreter* interp;
     public:
        
-        CircCFGInterp::Env* env;
         CFGLoader(const std::string& cfg) {
-            CircCFGInterp::Interpreter* interp = new CircCFGInterp::Interpreter(cfg);
-            env = new CircCFGInterp::Env(interp);
+           interp = new CircCFGInterp::Interpreter(cfg);
+            
         };
 
-        void CircInitWindow() {
-            auto w = CFGAttr<double>("window_width");
-            auto h = CFGAttr<double>("window_height");
-            auto t = CFGAttr<std::string>("window_title");
-            InitWindow(w, h, t.data());
+      
+        template<typename WrapperType>
+        WrapperType CFGAttr(std::string k) {
+            return std::any_cast<WrapperType>(interp->level->resolve(k));
         };
 
         template<typename WrapperType>
-        WrapperType CFGAttr(const std::string& key) {
-            return std::any_cast<WrapperType>(env->Get(key));
-        };
+        WrapperType CFGAttr(std::initializer_list<std::string> key_path) {
+            CircCFGInterp::Environment* current = interp->level;
+            std::any value;
 
-        CircCFGInterp::Env::MapType CFGObj(std::initializer_list<std::string> obj_path) {
-            return CircCFGInterp::Env::MapType(env->GetObj(obj_path));
+            for (const auto& key : key_path) {
+                if (!current) {
+                    throw std::runtime_error("Invalid key path: " + key);
+                }
+
+                value = current->resolve(key);
+
+                if (value.type() == typeid(CircCFGInterp::Environment*)) {
+                    current = std::any_cast<CircCFGInterp::Environment*>(value);
+                }
+                else {
+                    current = nullptr; 
+                }
+            }
+
+            // Cast the final value to the desired type
+            if (value.has_value()) {
+                return std::any_cast<WrapperType>(value);
+            }
+
+            throw std::runtime_error("Key path did not resolve to a valid value.");
         }
+
+       
         ~CFGLoader() {};
     };
 }
