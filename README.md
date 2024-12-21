@@ -58,7 +58,7 @@ For example given this Circ file :
 :: {
  $obj : {
    $x : 1,  
-   $y : 2
+   $y : 2,
    $inner : {
      $ix : 3,
      $iy : 4
