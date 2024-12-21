@@ -21,7 +21,7 @@ so do these...
 //here is the entry token
 ::
 {
-$some_var : 5,
+$some_var : 5
 }
 ```
 ### Different types :
@@ -31,7 +31,7 @@ $some_var : 5,
 {
 $double : 5,
 $str : "string",
-$obj : { $x : 1, $y : 2, }
+$obj : { $x : 1, $y : 2 }
 }
 ```
 Ok sweet! now we have some config variables, let's use them in some code!
@@ -61,8 +61,8 @@ For example given this Circ file :
    $y : 2,
    $inner : {
      $ix : 3,
-     $iy : 4,
-   },
+     $iy : 4
+   }
  }
 }
 ```
