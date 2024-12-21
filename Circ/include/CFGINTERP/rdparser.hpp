@@ -10,6 +10,7 @@ namespace CircCFGInterp {
 		typedef std::size_t TokenIndex;
 		std::vector<Token> tokens;
 		TokenIndex curr;
+		inline static bool is_last = false;
 
 		bool is_end() const {
 			return tokens[curr].t == TOK_EOF;
@@ -26,7 +27,9 @@ namespace CircCFGInterp {
 		Token advance() {
 			return tokens[curr++];
 		}
-
+		Token parser_peek() const {
+			return tokens[curr];
+		}
 
 
 		bool match(std::initializer_list<TokenType> t) {
@@ -46,6 +49,8 @@ namespace CircCFGInterp {
 
 		BaseExpression* primary() {
 			if (match({ TOK_STRING, TOK_NUM })) {
+				
+				
 				return new Literal(parser_previous().lit);
 			}
 
@@ -103,52 +108,51 @@ namespace CircCFGInterp {
 			return left;
 		}
 
-		BaseExpression* obj() {
-			std::map<std::string, BaseExpression*> members;
-
-			while (!match({ TOK_RCURL })) {
-				BaseExpression* v = var();
-				Assignment* a = (Assignment*)v;
-				std::string key = a->key;
-				
-				Literal* l = (Literal*)a->value;
-
-				members[key] = l;
-
-			}
-
-			return new Object(members);
-
-		}
-
-		Token parser_peek() const {
-			return tokens[curr];
+		
+		TokenType type_at_offset(size_t off) const {
+			return tokens[curr + off].t;
 		}
 
 		BaseExpression* var() {
-			if (parser_peek().t == TOK_DOLLA) {
-				while (match({ TOK_DOLLA })) {
-					std::string key = advance().word;
-
-					if (!match({ TOK_COL })) {
-						throw std::runtime_error("Missing ':'");
-					}
-					BaseExpression* value = term();
-					if (!is_end()) {
-						if (!match({ TOK_SEMI })) {
-
-							throw std::runtime_error("Missing ';'");
+			if (match({ TOK_DOLLA })) {
+				std::string key = advance().word;
+				std::cout << key << std::endl;
+				if (match({ TOK_COL })) {
+					BaseExpression* lit = term();
+					if (!check(TOK_RCURL)) {
+						if (!match({ TOK_COMMA })) {
+							throw std::runtime_error("Missing ',' after variable declaration.");
 						}
 					}
-
-					return new Assignment(key, value);
+					return new Assignment(key, lit);
+				}
+				else {
+					throw std::runtime_error("Missing ':' in variable declaration.");
 				}
 			}
 			else {
 				throw std::runtime_error("Variable declaration prefix '$' missing.");
 			}
+		}
+
+
+		BaseExpression* obj() {
+			std::map<std::string, BaseExpression*> members;
+			const signed short delim_offset = -1;
+			while (!match({ TOK_RCURL })) {
+					BaseExpression* v = var();
+					Assignment* a = (Assignment*)v;
+					std::string key = a->key;
+					Literal* l = (Literal*)a->value;
+					members[key] = l;
+				
+			}
 			
-		};
+
+
+			return new Object(members);
+
+		}
 
 
 
@@ -156,11 +160,12 @@ namespace CircCFGInterp {
 			BaseExpression* ast = nullptr;
 			while (!is_end()) {
 				if (match({ TOK_LCURL })) {
-					
+				
 					ast = obj();
+					
 				}
 				else {
-				
+					
 					throw std::runtime_error("Missing Entry '{'");
 				}
 				
