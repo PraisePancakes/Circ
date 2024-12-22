@@ -20,6 +20,8 @@ namespace CircCFGInterp {
 		TOK_RCURL,
 		TOK_LPAREN,
 		TOK_RPAREN,
+		TOK_LBRAC,
+		TOK_RBRAC,
 		TOK_COMMA,
 		TOK_PLUS,
 		TOK_MINUS,
@@ -168,6 +170,12 @@ namespace CircCFGInterp {
 				break;
 			case ')':
 				add_token(TOK_RPAREN);
+				break;
+			case '[':
+				add_token(TOK_LBRAC);
+				break;
+			case ']':
+				add_token(TOK_RBRAC);
 				break;
 			case '%':
 				add_token(TOK_MOD);

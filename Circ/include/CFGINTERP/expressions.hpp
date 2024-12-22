@@ -91,7 +91,7 @@ namespace CircCFGInterp {
 		std::vector<BaseExpression*> arr;
 		Array(std::vector<BaseExpression*> a) : arr(a) {};
 		std::any accept(const ExpressionVisitor& v) override {
-			v.visitArray(this);
+			return v.visitArray(this);
 		}
 		~Array() {};
 	};

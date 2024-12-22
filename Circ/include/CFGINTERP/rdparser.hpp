@@ -54,6 +54,10 @@ namespace CircCFGInterp {
 				return new Literal(parser_previous().lit);
 			}
 
+			if (match({ TOK_LBRAC })) {
+				return array();
+			}
+
 			if (match({ TOK_LCURL })) {
 
 				return obj();
@@ -81,7 +85,7 @@ namespace CircCFGInterp {
 		//grouping : $window_width : (a + b) - c,
 
 
-	
+		
 
 		BaseExpression* factor() {
 			BaseExpression* left = unary();
@@ -112,7 +116,26 @@ namespace CircCFGInterp {
 		TokenType type_at_offset(size_t off) const {
 			return tokens[curr + off].t;
 		}
+	
 
+		BaseExpression* array() {
+			std::vector<BaseExpression*> arr;
+			while (!match({ TOK_RBRAC })) {
+				BaseExpression* el = element();
+				arr.push_back(el);
+			}
+			return new Array(arr);
+		}
+
+		BaseExpression* element() {
+			BaseExpression* lit = term();
+			if (!check(TOK_RBRAC)) {
+				if (!match({ TOK_COMMA })) {
+					throw std::runtime_error("Missing ',' after element.");
+				}
+				return lit;
+			}
+		}
 		BaseExpression* var() {
 			if (match({ TOK_DOLLA })) {
 				std::string key = advance().word;

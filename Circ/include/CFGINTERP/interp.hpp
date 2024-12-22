@@ -104,6 +104,7 @@ namespace CircCFGInterp {
 
 		std::any visitArray(Array* a) const override {
 			std::vector<std::any> arr;
+
 			for (auto& i : a->arr) {
 				arr.push_back(i);
 			}
