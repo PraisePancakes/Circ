@@ -13,7 +13,7 @@ namespace CircCFGInterp {
 	struct Object;
 	struct ExpressionVisitor;
 	struct Grouping;
-
+	struct Array;
 
 	struct BaseExpression {
 		BaseExpression() {};
@@ -33,6 +33,7 @@ namespace CircCFGInterp {
 		virtual std::any visitUnary(Unary* u) const = 0;
 		virtual std::any visitObject(Object* u) const = 0;
 		virtual std::any visitGrouping(Grouping* g) const = 0;
+		virtual std::any visitArray(Array* a) const = 0;
 
 	};
 	struct Assignment : public BaseExpression {
@@ -84,6 +85,15 @@ namespace CircCFGInterp {
 			return v.visitObject(this);
 		}
 		~Object() {};
+	};
+
+	struct Array : public BaseExpression {
+		std::vector<BaseExpression*> arr;
+		Array(std::vector<BaseExpression*> a) : arr(a) {};
+		std::any accept(const ExpressionVisitor& v) override {
+			v.visitArray(this);
+		}
+		~Array() {};
 	};
 
 	struct Grouping : public BaseExpression {

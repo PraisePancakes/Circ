@@ -138,7 +138,6 @@ namespace CircCFGInterp {
 
 		BaseExpression* obj() {
 			std::map<std::string, BaseExpression*> members;
-			const signed short delim_offset = -1;
 			while (!match({ TOK_RCURL })) {
 					BaseExpression* v = var();
 					Assignment* a = (Assignment*)v;
@@ -147,28 +146,20 @@ namespace CircCFGInterp {
 					members[key] = l;
 				
 			}
-			
-
-
 			return new Object(members);
 
 		}
-
-
 
 		BaseExpression* parse() {
 			BaseExpression* ast = nullptr;
 			while (!is_end()) {
 				if (match({ TOK_LCURL })) {
-				
 					ast = obj();
-					
 				}
 				else {
 					
 					throw std::runtime_error("Missing Entry '{'");
 				}
-				
 
 			}
 			return ast;

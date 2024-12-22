@@ -102,6 +102,14 @@ namespace CircCFGInterp {
 			return env;
 		};
 
+		std::any visitArray(Array* a) const override {
+			std::vector<std::any> arr;
+			for (auto& i : a->arr) {
+				arr.push_back(i);
+			}
+			return arr;
+		}
+
 
 		std::any visitBinary(Binary* b) const override {
 			std::any l = evaluate(b->l);
