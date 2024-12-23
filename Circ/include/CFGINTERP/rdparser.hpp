@@ -161,10 +161,11 @@ namespace CircCFGInterp {
 				}
 			}
 			else {
+				
 				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Variable declaration prefix '$' missing.");
+				
 				sync();
-				
-				
+				return var();
 			}
 		}
 
@@ -172,7 +173,9 @@ namespace CircCFGInterp {
 		BaseExpression* obj() {
 			std::map<std::string, BaseExpression*> members;
 			while (!match({ TOK_RCURL })) {
+				
 					BaseExpression* v = var();
+					
 					Assignment* a = (Assignment*)v;
 					std::string key = a->key;
 					Literal* l = (Literal*)a->value;
@@ -184,29 +187,23 @@ namespace CircCFGInterp {
 		}
 
 		bool next_valid_token() {
-			switch (parser_peek().t) {
-			case TOK_ENTRY:
-			case TOK_COMMA:
-			case TOK_LCURL:
-			case TOK_COL:
-			case TOK_RCURL:
-			case TOK_LPAREN:
-			case TOK_RPAREN:
-			case TOK_DOLLA:
-			case TOK_LBRAC:
-			case TOK_RBRAC:
+			if (parser_peek().t == TOK_DOLLA) {
 				return true;
-			default:
+			}
+			else {
 				advance();
+				return false;
 			}
 		};
 		static inline bool had_error = false;
 
 		void sync() {
 			had_error = true;
-			while (!next_valid_token()) {
+			if (!next_valid_token()) {
+				sync();
 			}
 			
+			return;
 		};
 
 		BaseExpression* parse() {
