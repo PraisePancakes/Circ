@@ -59,7 +59,7 @@ namespace CircCFGInterp {
 				return array();
 			}
 
-			if (match({ TOK_LCURL })) {
+			if (parser_peek().t == TOK_LCURL ) {
 
 				return obj();
 			}
@@ -139,7 +139,7 @@ namespace CircCFGInterp {
 				return lit;
 			}
 		}
-		BaseExpression* var() {
+		BaseExpression* decl() {
 			if (match({ TOK_DOLLA })) {
 				std::string key = advance().word;
 				
@@ -152,39 +152,23 @@ namespace CircCFGInterp {
 							sync();
 						}
 					}
-					return new Assignment(key, lit);
+					return new Declaration(key, lit);
 				}
 				else {
 					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ':' in variable declaration.");
 					sync();
-					
 				}
 			}
 			else {
 				
 				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Variable declaration prefix '$' missing.");
-				
 				sync();
-				return var();
 			}
+			return decl();
 		}
 
 
-		BaseExpression* obj() {
-			std::map<std::string, BaseExpression*> members;
-			while (!match({ TOK_RCURL })) {
-				
-					BaseExpression* v = var();
-					
-					Assignment* a = (Assignment*)v;
-					std::string key = a->key;
-					Literal* l = (Literal*)a->value;
-					members[key] = l;
-				
-			}
-			return new Object(members);
-
-		}
+		
 
 		bool next_valid_token() {
 			if (parser_peek().t == TOK_DOLLA) {
@@ -195,9 +179,10 @@ namespace CircCFGInterp {
 				return false;
 			}
 		};
-		static inline bool had_error = false;
+		
 
 		void sync() {
+			if (is_end()) return;
 			had_error = true;
 			if (!next_valid_token()) {
 				sync();
@@ -205,19 +190,33 @@ namespace CircCFGInterp {
 			
 			return;
 		};
+	static inline bool had_error = false;
+		BaseExpression* obj() {
+			std::map<std::string, BaseExpression*> members;
+			
+			if (match({ TOK_LCURL })) {
+				while (!match({ TOK_RCURL })) {
+					BaseExpression* v = decl();
+					Declaration* a = (Declaration*)v;
+					std::string key = a->key;
+					Literal* l = (Literal*)a->value;
+					members[key] = l;
+				}
+				
+			}
+			else {
+				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing '{'.");
+				sync();
+
+			}
+			return new Object(members);
+
+		}
 
 		BaseExpression* parse() {
 			BaseExpression* ast = nullptr;
 			while (!is_end()) {
-				if (match({ TOK_LCURL })) {
 					ast = obj();
-				}
-				else {
-					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing Entry '::' Token.");
-					sync();
-					
-				}
-
 			}
 			return ast;
 		};
@@ -226,15 +225,7 @@ namespace CircCFGInterp {
 		BaseExpression* ast;
 		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
 			try {
-				if (match({ TOK_ENTRY })) {
-					ast = parse();
-					
-				}
-				else {
-					ParseErrorLogger::instance().log(LogType::ENTRY, parser_peek(), "Missing Entry '::' Token.");
-					throw std::runtime_error("CFG ENTRY NOT FOUND");
-				}
-
+				ast = parse();
 				if (had_error) {
 					ParseErrorLogger::instance().print_list();
 					throw std::runtime_error("total errors : " + std::to_string(ParseErrorLogger::instance().logsize()));

@@ -81,7 +81,7 @@ namespace CircCFGInterp {
 			return true;
 		}
 		
-		std::any visitAssignment(Assignment* a) const override {
+		std::any visitDeclaration(Declaration* a) const override {
 			std::pair<std::string, std::any> pair;
 			pair.first = a->key;
 			pair.second = evaluate(a->value);

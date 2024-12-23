@@ -1,12 +1,7 @@
 // @incorp CircMacs
-:: {
- $obj : {
-   $x : 1,
-   y : 2,
-   $inner : {
-     $ix : 3
+{
+   inner : {
+     $ix : 3,
      $iy : 4
    },
-   $arr : [1, 0, 2]
- }
 }

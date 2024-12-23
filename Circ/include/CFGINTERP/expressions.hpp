@@ -7,7 +7,7 @@
 namespace CircCFGInterp {
 
 	struct Literal;
-	struct Assignment;
+	struct Declaration;
 	struct Binary;
 	struct Unary;
 	struct Object;
@@ -28,7 +28,7 @@ namespace CircCFGInterp {
 	*/
 	struct ExpressionVisitor {
 		virtual std::any visitLiteral(Literal* l) const = 0;
-		virtual std::any visitAssignment(Assignment* a) const = 0;
+		virtual std::any visitDeclaration(Declaration* a) const = 0;
 		virtual std::any visitBinary(Binary* b) const = 0;
 		virtual std::any visitUnary(Unary* u) const = 0;
 		virtual std::any visitObject(Object* u) const = 0;
@@ -36,14 +36,14 @@ namespace CircCFGInterp {
 		virtual std::any visitArray(Array* a) const = 0;
 
 	};
-	struct Assignment : public BaseExpression {
+	struct Declaration : public BaseExpression {
 		std::string key;
 		BaseExpression* value;
-		Assignment(const std::string& s, BaseExpression* v) : key(s), value(v) {};
+		Declaration(const std::string& s, BaseExpression* v) : key(s), value(v) {};
 		std::any accept(const ExpressionVisitor& v) override {
-			return v.visitAssignment(this); //look up env key, if this key is already inserted, update the value, else insert
+			return v.visitDeclaration(this); //look up env key, if this key is already inserted, update the value, else insert
 		};
-		~Assignment() {};
+		~Declaration() {};
 	};
 	struct Literal : public BaseExpression {
 		std::any lit;
