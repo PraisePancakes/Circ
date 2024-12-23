@@ -44,7 +44,7 @@ For Primary Data Types (PDTs) you can simply access a variable like so.
 ```c++
 double dbl_var = cfgl.CFGAttr<double>("double_variable");
 ```
-The CFGAttr function takes the type of the config variable as its template argument and the name of that variable as its function argument, this searches the Circ env for this variable and throws an exception if one isn't found. Ok cool, now how do we retrieve objects?
+The config attribute (CFGAttr) function takes the type of the config variable as its template argument and the name of that variable as its function argument, this searches the Circ env for this variable and throws an exception if one isn't found. Ok cool, now how do we retrieve objects?
 ```c++
         template<typename WrapperType>
         WrapperType CFGAttr(std::initializer_list<std::string> key_path)
