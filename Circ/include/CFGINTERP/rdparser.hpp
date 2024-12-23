@@ -3,9 +3,10 @@
 #include <vector>
 #include "lexer.hpp"
 #include "expressions.hpp"
+#include "error_log.hpp"
 
 namespace CircCFGInterp {
-
+	
 	class Parser {
 		typedef std::size_t TokenIndex;
 		std::vector<Token> tokens;
@@ -65,13 +66,14 @@ namespace CircCFGInterp {
 			if (match({ TOK_LPAREN })) {
 				BaseExpression* expr = term();
 				if (!match({ TOK_RPAREN })) {
-					
-					throw std::runtime_error("Missing ')'");
+					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ')'");
+					sync();
 				}
 				return new Grouping(expr);
 			}
+			ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Expected a primary expression.");
+			sync();
 			
-			throw std::runtime_error("Expected a primary expression.");
 		};
 
 		BaseExpression* unary() {
@@ -131,7 +133,8 @@ namespace CircCFGInterp {
 			BaseExpression* lit = term();
 			if (!check(TOK_RBRAC)) {
 				if (!match({ TOK_COMMA })) {
-					throw std::runtime_error("Missing ',' after element.");
+					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ',' after element.");
+					sync();
 				}
 				return lit;
 			}
@@ -139,22 +142,29 @@ namespace CircCFGInterp {
 		BaseExpression* var() {
 			if (match({ TOK_DOLLA })) {
 				std::string key = advance().word;
-				std::cout << key << std::endl;
+				
 				if (match({ TOK_COL })) {
 					BaseExpression* lit = term();
 					if (!check(TOK_RCURL)) {
 						if (!match({ TOK_COMMA })) {
-							throw std::runtime_error("Missing ',' after variable declaration.");
+							
+							ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ',' after variable declaration.");
+							sync();
 						}
 					}
 					return new Assignment(key, lit);
 				}
 				else {
-					throw std::runtime_error("Missing ':' in variable declaration.");
+					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ':' in variable declaration.");
+					sync();
+					
 				}
 			}
 			else {
-				throw std::runtime_error("Variable declaration prefix '$' missing.");
+				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Variable declaration prefix '$' missing.");
+				sync();
+				
+				
 			}
 		}
 
@@ -173,6 +183,32 @@ namespace CircCFGInterp {
 
 		}
 
+		bool next_valid_token() {
+			switch (parser_peek().t) {
+			case TOK_ENTRY:
+			case TOK_COMMA:
+			case TOK_LCURL:
+			case TOK_COL:
+			case TOK_RCURL:
+			case TOK_LPAREN:
+			case TOK_RPAREN:
+			case TOK_DOLLA:
+			case TOK_LBRAC:
+			case TOK_RBRAC:
+				return true;
+			default:
+				advance();
+			}
+		};
+		static inline bool had_error = false;
+
+		void sync() {
+			had_error = true;
+			while (!next_valid_token()) {
+			}
+			
+		};
+
 		BaseExpression* parse() {
 			BaseExpression* ast = nullptr;
 			while (!is_end()) {
@@ -180,8 +216,9 @@ namespace CircCFGInterp {
 					ast = obj();
 				}
 				else {
+					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing Entry '::' Token.");
+					sync();
 					
-					throw std::runtime_error("Missing Entry '{'");
 				}
 
 			}
@@ -194,18 +231,23 @@ namespace CircCFGInterp {
 			try {
 				if (match({ TOK_ENTRY })) {
 					ast = parse();
-
+					
 				}
 				else {
-
+					ParseErrorLogger::instance().log(LogType::ENTRY, parser_peek(), "Missing Entry '::' Token.");
 					throw std::runtime_error("CFG ENTRY NOT FOUND");
+				}
+
+				if (had_error) {
+					ParseErrorLogger::instance().print_list();
+					throw std::runtime_error("total errors : " + std::to_string(ParseErrorLogger::instance().logsize()));
 				}
 			}
 			catch (std::exception& e) {
 				std::cerr << e.what() << std::endl;
+				exit(EXIT_FAILURE);
 			}
 			
-
 		};
 		~Parser() {};
 	};

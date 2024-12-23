@@ -41,5 +41,8 @@
     <ClInclude Include="Circ\include\CFGINTERP\rdparser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\error_log.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

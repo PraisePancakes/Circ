@@ -250,10 +250,10 @@ namespace CircCFGInterp {
 			std::fstream stream;
 			stream.open(path);
 			if (!stream.is_open()) {
-				std::cout << "file failed to open" << std::endl;
+				std::cerr << "file failed to open" << std::endl;
 			}
 			else {
-				std::cout << "cfg file opened" << std::endl;
+				std::cerr << "cfg file opened" << std::endl;
 			}
 			std::string line;
 			while (std::getline(stream, line)) {
