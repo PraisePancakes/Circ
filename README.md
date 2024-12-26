@@ -8,7 +8,7 @@
 ## Usage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lets begin with the configuration language. Don't worry this is going to be an easy learn.
 ### Entry :
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each Circ file has an entry point. To denote this entry point, type ```::``` before the file's variables. Following the entry point, create the entry object : ```{ }``` 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each Circ file has an entry point. create the entry object : ```{ }``` 
 ### Declaring a configuration variable :
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To assign a variable all you have to do is prefix the identifier with a ```$``` sign and assign it ```:``` to a value.
 A very simple file will look something like this.
@@ -17,9 +17,7 @@ A very simple file will look something like this.
 /*
 so do these...
 */
-
-//here is the entry token
-::
+//here is the entry
 {
 $some_var : 5
 }
@@ -27,7 +25,6 @@ $some_var : 5
 ### Different types :
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Circ currently supports three types of variables, double, string, and objects.
 ```
-::
 {
 $double : 5,
 $str : "string",
@@ -47,7 +44,7 @@ For Primary Data Types (PDTs) you can simply access a variable like so.
 ```c++
 double dbl_var = cfgl.CFGAttr<double>("double_variable");
 ```
-The CFGAttr function takes the type of the config variable as its template argument and the name of that variable as its function argument, this searches the Circ env for this variable and throws an exception if one isn't found. Ok cool, now how do we retrieve objects?
+The config attribute (CFGAttr) function takes the type of the config variable as its template argument and the name of that variable as its function argument, this searches the Circ env for this variable and throws an exception if one isn't found. Ok cool, now how do we retrieve objects?
 ```c++
         template<typename WrapperType>
         WrapperType CFGAttr(std::initializer_list<std::string> key_path)
@@ -55,7 +52,7 @@ The CFGAttr function takes the type of the config variable as its template argum
 This function takes a list of strings starting with the outer-most key to the inner most key of the object.
 For example given this Circ file :
 ```
-:: {
+{
  $obj : {
    $x : 1,  
    $y : 2,
@@ -89,6 +86,7 @@ That's it! Well... for now, I am still working hard every day to better this pro
  2. Using variable substitution for values.
  3. Multi-file modules
  4. Keywords and API functions that incorporate Raylib.
+ 5. Arrays and other data types.
 
 ## Building
 This project is built using CMake on MSVS2022, ISO C++20 Standard, with the latest version of Raylib. 
