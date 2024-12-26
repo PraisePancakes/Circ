@@ -16,9 +16,16 @@ int main() {
 
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
-   
-    auto v = cfgl.CFGAttr<std::vector<std::any>>({ "arr" });
-    auto d = std::any_cast<double>(v[1]);
+
+    /*
+        implement :
+        auto v = cfgl.CFGAttr<std::vector<double>>({"arr"});
+        auto d = v[0];
+
+    */
+    auto v = cfgl.CFGAttr<std::vector<double>>({ "arr" });
+    auto d = v[1];
+
     std::cout << d;
  
    
