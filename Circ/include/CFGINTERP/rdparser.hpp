@@ -188,12 +188,9 @@ namespace CircCFGInterp {
 			std::vector<BaseExpression*> arr;
 			if (match({ TOK_LBRAC })) {
 				while (!match({ TOK_RBRAC })) {
-					
 					BaseExpression* el = element();
 					Literal* l = (Literal*)el;
-					
 					arr.push_back(el);
-					
 				}
 			}
 			else {
