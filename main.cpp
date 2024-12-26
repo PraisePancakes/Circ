@@ -18,7 +18,8 @@ int main() {
     Circ::CFGLoader cfgl(cfg_path);
    
     auto v = cfgl.CFGAttr<std::vector<std::any>>({ "arr" });
-    auto d = std::any_cast<double>(v[1]);
+    auto iv = std::any_cast<std::vector<std::any>>(v[1]);
+    auto d = std::any_cast<double>(iv[0]);
     std::cout << d;
  
    
