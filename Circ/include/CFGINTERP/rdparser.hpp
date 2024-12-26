@@ -55,7 +55,7 @@ namespace CircCFGInterp {
 				return new Literal(parser_previous().lit);
 			}
 
-			if (match({ TOK_LBRAC })) {
+			if (parser_peek().t == TOK_LBRAC) {
 				return array();
 			}
 
@@ -120,14 +120,7 @@ namespace CircCFGInterp {
 		}
 	
 
-		BaseExpression* array() {
-			std::vector<BaseExpression*> arr;
-			while (!match({ TOK_RBRAC })) {
-				BaseExpression* el = element();
-				arr.push_back(el);
-			}
-			return new Array(arr);
-		}
+		
 
 		BaseExpression* element() {
 			BaseExpression* lit = term();
@@ -136,8 +129,8 @@ namespace CircCFGInterp {
 					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ',' after element.");
 					sync();
 				}
-				return lit;
 			}
+			return lit;
 		}
 		BaseExpression* decl() {
 			if (match({ TOK_DOLLA })) {
@@ -190,6 +183,28 @@ namespace CircCFGInterp {
 			
 			return;
 		};
+
+		BaseExpression* array() {
+			std::vector<BaseExpression*> arr;
+			if (match({ TOK_LBRAC })) {
+				while (!match({ TOK_RBRAC })) {
+					
+					BaseExpression* el = element();
+					Literal* l = (Literal*)el;
+					
+					arr.push_back(el);
+					
+				}
+			}
+			else {
+				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ']'.");
+				sync();
+			}
+			
+			
+			return new Array(arr);
+		}
+
 	static inline bool had_error = false;
 		BaseExpression* obj() {
 			std::map<std::string, BaseExpression*> members;

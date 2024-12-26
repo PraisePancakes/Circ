@@ -45,10 +45,11 @@ namespace CircCFGInterp {
 		};
 		~Declaration() {};
 	};
-	struct Literal : public BaseExpression {
+	struct Literal : public BaseExpression { 
 		std::any lit;
 
-		Literal(std::any l) : lit(l) {};
+		Literal(std::any l) : lit(l) {
+		};
 		std::any accept(const ExpressionVisitor& v) override {
 			return v.visitLiteral(this);
 		};
@@ -89,7 +90,9 @@ namespace CircCFGInterp {
 
 	struct Array : public BaseExpression {
 		std::vector<BaseExpression*> arr;
-		Array(std::vector<BaseExpression*> a) : arr(a) {};
+		Array(std::vector<BaseExpression*> a) : arr(a) {
+			
+		};
 		std::any accept(const ExpressionVisitor& v) override {
 			return v.visitArray(this);
 		}

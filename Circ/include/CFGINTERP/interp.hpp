@@ -94,6 +94,7 @@ namespace CircCFGInterp {
 			
 			std::map<std::string, std::any> members;
 			for (const auto& [key, value] : a->members) {
+				
 				members[key] = evaluate(value);
 			}
 			Environment* env = new Environment(members);
@@ -102,12 +103,16 @@ namespace CircCFGInterp {
 			return env;
 		};
 
-		std::any visitArray(Array* a) const override {
+		std::any visitArray(Array * a) const override {
 			std::vector<std::any> arr;
-
-			for (auto& i : a->arr) {
-				arr.push_back(i);
+			for (BaseExpression* i : a->arr) {
+				Literal* literal = (Literal*)i;
+				std::any v = evaluate(literal);
+				
+				arr.push_back(v);
+				
 			}
+			
 			return arr;
 		}
 
@@ -162,8 +167,11 @@ namespace CircCFGInterp {
 				return std::any_cast<double>(l->lit);
 			}
 			if (l->lit.type() == typeid(std::string)) {
+				
 				return std::any_cast<std::string>(l->lit);
 			}
+
+			
 			return nullptr;
 		};
 		BaseExpression* ast;
@@ -171,7 +179,9 @@ namespace CircCFGInterp {
 		inline static Environment* level = nullptr;
 		Interpreter(const std::string& cfg_path) {
 			Lexer l(cfg_path);
+		
 			Parser p(l.tokens);
+			
 			ast = p.ast;
 			evaluate(ast);
 		};
@@ -179,7 +189,10 @@ namespace CircCFGInterp {
 			return ast;
 		}
 		std::any evaluate(BaseExpression* e) const {
-			return e->accept(*this);
+			std::any v = e->accept(*this);
+			
+			return v;
+		
 		};
 
 

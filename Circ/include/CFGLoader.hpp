@@ -17,8 +17,10 @@ namespace Circ {
     public:
        
         CFGLoader(const std::string& cfg) {
+
+          
            interp = new CircCFGInterp::Interpreter(cfg);
-            
+           
         };
 
       
@@ -32,7 +34,7 @@ namespace Circ {
            
             CircCFGInterp::Environment* current = interp->level;
             std::any value;
-
+           
             for (const auto& key : key_path) {
                 if (!current) {
                    
@@ -40,7 +42,7 @@ namespace Circ {
                 }
 
                 value = current->resolve(key);
-
+               
                 if (value.type() == typeid(CircCFGInterp::Environment*)) {
                     current = std::any_cast<CircCFGInterp::Environment*>(value);
                 }
