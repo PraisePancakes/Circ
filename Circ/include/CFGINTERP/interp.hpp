@@ -104,16 +104,34 @@ namespace CircCFGInterp {
 		};
 
 		std::any visitArray(Array * a) const override {
-			std::vector<std::any> arr;
-			for (BaseExpression* i : a->arr) {
-				Literal* literal = (Literal*)i;
-				std::any v = evaluate(literal);
-				
-				arr.push_back(v);
-				
+			std::any arr;
+			BaseExpression* first = a->arr[0];
+			std::any t = evaluate(first);
+			if (t.type() == typeid(double)) {
+				std::vector<double> arr = {};
+
+				for (BaseExpression* i : a->arr) {
+					Literal* literal = (Literal*)i;
+					std::any v = evaluate(literal);
+					arr.push_back(std::any_cast<double>(v));
+				}
+
+				return arr;
 			}
-			
-			return arr;
+
+			if (t.type() == typeid(std::string)) {
+				std::vector<std::string> arr = {};
+
+				for (BaseExpression* i : a->arr) {
+					Literal* literal = (Literal*)i;
+					std::any v = evaluate(literal);
+					arr.push_back(std::any_cast<std::string>(v));
+				}
+
+				return arr;
+			}
+
+			throw std::runtime_error("Invalid array type");
 		}
 
 
