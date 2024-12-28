@@ -14,12 +14,35 @@ namespace Circ {
    
     class CFGLoader {
         CircCFGInterp::Interpreter* interp;
+        void authenticate_circ_extension(const std::string& cfg) {
+            size_t i = cfg.length();
+            
+            std::string ext = "";
+            while (cfg[i] != '.') {
+                --i;
+                ext += cfg[i];
+                if (i == 0) {
+                    throw std::runtime_error("invalid config path");
+                }
+            }
+
+            if (ext != "cric.") {
+                throw std::runtime_error("Wrong extension type : " + ext + "\n");
+            }
+
+
+        };
     public:
        
         CFGLoader(const std::string& cfg) {
-
-          
-           interp = new CircCFGInterp::Interpreter(cfg);
+            try {
+                authenticate_circ_extension(cfg);
+                interp = new CircCFGInterp::Interpreter(cfg);
+            }
+            catch(std::exception& e) {
+                std::cerr << e.what() << std::endl;
+            }
+           
            
         };
 

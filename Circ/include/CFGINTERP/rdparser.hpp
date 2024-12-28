@@ -26,7 +26,8 @@ namespace CircCFGInterp {
 		}
 
 		Token advance() {
-			return tokens[curr++];
+			if (!is_end()) curr++;
+			return parser_previous();
 		}
 		Token parser_peek() const {
 			return tokens[curr];
@@ -133,7 +134,7 @@ namespace CircCFGInterp {
 			return lit;
 		}
 		BaseExpression* decl() {
-			if (match({ TOK_DOLLA })) {
+			if (match({ TOK_DOLLA }) ) {
 				std::string key = advance().word;
 				
 				if (match({ TOK_COL })) {
@@ -157,6 +158,7 @@ namespace CircCFGInterp {
 				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Variable declaration prefix '$' missing.");
 				sync();
 			}
+			
 			return decl();
 		}
 
@@ -164,7 +166,8 @@ namespace CircCFGInterp {
 		
 
 		bool next_valid_token() {
-			if (parser_peek().t == TOK_DOLLA) {
+			
+			if (parser_peek().t == TOK_DOLLA ) {
 				return true;
 			}
 			else {
@@ -175,13 +178,12 @@ namespace CircCFGInterp {
 		
 
 		void sync() {
+			
 			if (is_end()) return;
 			had_error = true;
 			if (!next_valid_token()) {
 				sync();
 			}
-			
-			return;
 		};
 
 		BaseExpression* array() {
@@ -211,6 +213,7 @@ namespace CircCFGInterp {
 					BaseExpression* v = decl();
 					Declaration* a = (Declaration*)v;
 					std::string key = a->key;
+					
 					Literal* l = (Literal*)a->value;
 					members[key] = l;
 				}
@@ -228,7 +231,9 @@ namespace CircCFGInterp {
 		BaseExpression* parse() {
 			BaseExpression* ast = nullptr;
 			while (!is_end()) {
+				
 					ast = obj();
+					
 			}
 			return ast;
 		};
@@ -238,6 +243,7 @@ namespace CircCFGInterp {
 		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
 			try {
 				ast = parse();
+				
 				if (had_error) {
 					ParseErrorLogger::instance().print_list();
 					throw std::runtime_error("total errors : " + std::to_string(ParseErrorLogger::instance().logsize()));

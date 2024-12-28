@@ -11,17 +11,8 @@ namespace CircCFGInterp {
 	struct Binary;
 	struct Unary;
 	struct Object;
-	struct ExpressionVisitor;
 	struct Grouping;
 	struct Array;
-
-	struct BaseExpression {
-		BaseExpression() {};
-		virtual std::any accept(const ExpressionVisitor& v) = 0;
-		~BaseExpression() {};
-	};
-
-
 
 	/*
 		ExpressionVisitor and the different expression types
@@ -36,6 +27,15 @@ namespace CircCFGInterp {
 		virtual std::any visitArray(Array* a) const = 0;
 
 	};
+
+	struct BaseExpression {
+		BaseExpression() {};
+		virtual std::any accept(const ExpressionVisitor& v) = 0;
+		~BaseExpression() {};
+	};
+
+
+
 	struct Declaration : public BaseExpression {
 		std::string key;
 		BaseExpression* value;

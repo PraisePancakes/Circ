@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="cfg\config.txt" />
+    <Text Include="cfg\config.circ" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Circ\include\CFGLoader.hpp">
@@ -42,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Circ\include\CFGINTERP\error_log.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\statements.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

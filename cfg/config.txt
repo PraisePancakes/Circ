@@ -1,4 +1,0 @@
-// @incorp CircMacs
-{
-  $arr : [[0], [1], [2]]
-}
