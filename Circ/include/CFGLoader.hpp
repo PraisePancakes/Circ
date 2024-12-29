@@ -38,6 +38,7 @@ namespace Circ {
             try {
                 authenticate_circ_extension(cfg);
                 interp = new CircCFGInterp::Interpreter(cfg);
+               
             }
             catch(std::exception& e) {
                 std::cerr << e.what() << std::endl;
@@ -49,13 +50,13 @@ namespace Circ {
       
         template<typename WrapperType>
         WrapperType CFGAttr(std::string k) {
-            return std::any_cast<WrapperType>(interp->level->resolve(k));
+            return std::any_cast<WrapperType>(interp->env->resolve(k));
         };
 
         template<typename WrapperType>
         WrapperType CFGAttr(std::initializer_list<std::string> key_path) {
            
-            CircCFGInterp::Environment* current = interp->level;
+            CircCFGInterp::Environment* current = interp->env;
             std::any value;
            
             for (const auto& key : key_path) {
@@ -63,10 +64,12 @@ namespace Circ {
                    
                     throw std::runtime_error("Invalid key path: " + key);
                 }
-
+                
                 value = current->resolve(key);
+                
                
                 if (value.type() == typeid(CircCFGInterp::Environment*)) {
+                   
                     current = std::any_cast<CircCFGInterp::Environment*>(value);
                 }
                 else {

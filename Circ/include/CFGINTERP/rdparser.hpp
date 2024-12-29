@@ -4,6 +4,7 @@
 #include "lexer.hpp"
 #include "expressions.hpp"
 #include "error_log.hpp"
+#include "statements.hpp"
 
 namespace CircCFGInterp {
 	
@@ -51,29 +52,32 @@ namespace CircCFGInterp {
 
 		BaseExpression* primary() {
 			if (match({ TOK_STRING, TOK_NUM })) {
-				
-				
 				return new Literal(parser_previous().lit);
 			}
 
-			if (parser_peek().t == TOK_LBRAC) {
-				return array();
-			}
-
-			if (parser_peek().t == TOK_LCURL ) {
-
-				return obj();
-			}
 			if (match({ TOK_LPAREN })) {
 				BaseExpression* expr = term();
 				if (!match({ TOK_RPAREN })) {
 					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ')'");
-					sync();
+					throw std::runtime_error("");
 				}
 				return new Grouping(expr);
 			}
+
+			if (match({ TOK_LCURL })) {
+				BaseExpression* object = obj();
+				if (!match({ TOK_RCURL })) {
+					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing '}'");
+					throw std::runtime_error("");
+				}
+				Object* o = (Object*)object;
+				return o;
+			}
+
+			
+
 			ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Expected a primary expression.");
-			sync();
+			throw std::runtime_error("");
 			
 		};
 
@@ -121,138 +125,107 @@ namespace CircCFGInterp {
 		}
 	
 
-		
-
-		BaseExpression* element() {
-			BaseExpression* lit = term();
-			if (!check(TOK_RBRAC)) {
-				if (!match({ TOK_COMMA })) {
-					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ',' after element.");
-					sync();
-				}
-			}
-			return lit;
-		}
-		BaseExpression* decl() {
-			if (match({ TOK_DOLLA }) ) {
-				std::string key = advance().word;
-				
-				if (match({ TOK_COL })) {
-					BaseExpression* lit = term();
-					if (!check(TOK_RCURL)) {
-						if (!match({ TOK_COMMA })) {
-							
-							ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ',' after variable declaration.");
-							sync();
-						}
-					}
-					return new Declaration(key, lit);
-				}
-				else {
-					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ':' in variable declaration.");
-					sync();
-				}
-			}
-			else {
-				
-				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Variable declaration prefix '$' missing.");
-				sync();
-			}
-			
-			return decl();
-		}
-
-
-		
-
-		bool next_valid_token() {
-			
-			if (parser_peek().t == TOK_DOLLA ) {
-				return true;
-			}
-			else {
-				advance();
-				return false;
-			}
-		};
-		
-
 		void sync() {
-			
-			if (is_end()) return;
-			had_error = true;
-			if (!next_valid_token()) {
-				sync();
+			advance();
+			while (!is_end())
+			{
+				// parser ignores until the next statement is found, if and only if the previous statement throws an exception. Panic mode recovery allows for the parser to catch up to the next correct rule discarding all previous false rules.
+				if (parser_previous().t == TOK_COMMA)
+				{
+					return;
+				}
+				switch (parser_peek().t)
+				{
+				case TOK_DOLLA:
+					return;
+				}
+				advance();
 			}
 		};
 
-		BaseExpression* array() {
-			std::vector<BaseExpression*> arr;
-			if (match({ TOK_LBRAC })) {
-				while (!match({ TOK_RBRAC })) {
-					BaseExpression* el = element();
-					Literal* l = (Literal*)el;
-					arr.push_back(el);
-				}
-			}
-			else {
-				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ']'.");
-				sync();
-			}
-			
-			
-			return new Array(arr);
-		}
 
-	static inline bool had_error = false;
+		BaseExpression* assignment() {
+			BaseExpression* e = term();
+			if (match({ TOK_COL })) {
+				Token eq = parser_previous();
+				BaseExpression* r = assignment();
+				if (Variable* v = (Variable*)e) {
+					std::string l = v->name;
+					return new Assignment(l, r);
+				}
+
+				ParseErrorLogger::instance().log(LogType::SYNTAX, eq, "Invalid assignment target");
+			}
+			return e;
+		}
 		BaseExpression* obj() {
 			std::map<std::string, BaseExpression*> members;
+			while (parser_peek().t != TOK_RCURL && !is_end()) {
+				Decl* d = (Decl*)statement();
+				members[d->key] = d->value;
+			}
 			
-			if (match({ TOK_LCURL })) {
-				while (!match({ TOK_RCURL })) {
-					BaseExpression* v = decl();
-					Declaration* a = (Declaration*)v;
-					std::string key = a->key;
-					
-					Literal* l = (Literal*)a->value;
-					members[key] = l;
-				}
-				
-			}
-			else {
-				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing '{'.");
-				sync();
-
-			}
 			return new Object(members);
-
 		}
 
-		BaseExpression* parse() {
-			BaseExpression* ast = nullptr;
-			while (!is_end()) {
-				
-					ast = obj();
-					
-			}
-			return ast;
-		};
+		BaseExpression* expression() {
+			return assignment();
+		}
+		
 
-	public:
-		BaseExpression* ast;
-		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
-			try {
-				ast = parse();
+		
+
+		BaseStatement* var_decl() {
+			std::string key = advance().word;
+			BaseExpression* init = nullptr;
+			if (match({ TOK_COL })) {
+				init = expression();
+			}
+			else {
 				
-				if (had_error) {
-					ParseErrorLogger::instance().print_list();
-					throw std::runtime_error("total errors : " + std::to_string(ParseErrorLogger::instance().logsize()));
+				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), " Missing ':' Circ variables must be initialized.");
+				throw std::runtime_error("");
+			}
+			if (parser_peek().t != TOK_EOF && parser_peek().t != TOK_RCURL) {
+				if (!match({ TOK_COMMA })) {
+					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Expected ',' after expression");
+					throw std::runtime_error("");
 				}
+			}
+			
+			return new Decl(key, init);
+		}
+
+		BaseStatement* statement() {
+			if (match({ TOK_DOLLA })) {
+				return var_decl();
+			}
+			else {
+				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing '$', Circ variables must be prefixed with '$'.");
+				throw std::runtime_error("");
+			}
+		}
+
+		BaseStatement* decl() {
+			try {
+				
+				return statement();
 			}
 			catch (std::exception& e) {
 				std::cerr << e.what() << std::endl;
-				exit(EXIT_FAILURE);
+				sync();
 			}
+		}
+
+	public:
+		std::vector<BaseStatement*> statements;
+		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
+			
+				while (!is_end()) {
+					statements.push_back(decl());
+				}
+			
+			ParseErrorLogger::instance().print_list();
 			
 		};
 		~Parser() {};

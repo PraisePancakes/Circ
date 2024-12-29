@@ -188,14 +188,17 @@ namespace CircCFGInterp {
 				if (peek() == '/') {
 					advance();
 					while (peek() != '\n' && !is_end()) {
-
 						advance();
 					};
+					line++;
 				}
 				else if (peek() == '*') {
 					advance();
 					while ((peek() != '*' && peek_next() != '/' && !is_end())) {
 						advance();
+						if (peek() == '\n') {
+							line++;
+						}
 					}
 					advance();
 					advance();

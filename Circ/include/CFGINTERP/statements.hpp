@@ -7,13 +7,12 @@
 namespace CircCFGInterp {
 	struct Block;
 	struct Decl;
-	struct Expression;
+	
 
 
 	struct StatementVisitor {
-		virtual std::any visitBlock(Block* b) = 0;
 		virtual std::any visitDecl(Decl* d) = 0;
-		virtual std::any visitExpression(Expression* e) = 0;
+		
 	};
 
 	struct BaseStatement {
@@ -22,14 +21,6 @@ namespace CircCFGInterp {
 		~BaseStatement() {};
 	};
 
-	struct Block : BaseStatement {
-		std::vector<BaseStatement*> statements;
-		Block(std::vector<BaseStatement*> s) : statements(s) {};
-		std::any accept(StatementVisitor* v) override {
-			return v->visitBlock(this);
-		}
-		~Block() {};
-	};
 
 	struct Decl : BaseStatement {
 		std::string key;
@@ -41,12 +32,5 @@ namespace CircCFGInterp {
 		~Decl() {};
 	};
 
-	struct Expression : BaseStatement {
-		BaseExpression* e;
-		Expression(BaseExpression* e) : e(e) {};
-		std::any accept(StatementVisitor* v) override {
-			return v->visitExpression(this);
-		}
-		~Expression() {};
-	};
+	
 }

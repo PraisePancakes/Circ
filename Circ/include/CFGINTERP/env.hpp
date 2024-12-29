@@ -5,9 +5,12 @@ namespace CircCFGInterp {
 	public:
 		std::map<std::string, std::any> members;
 		Environment* outer;
-
+		Environment() {
+			outer = nullptr;
+		}
 		Environment(std::map<std::string, std::any> members, Environment* outer = nullptr)
 			: members(members), outer(outer) {
+			
 		}
 
 		std::any resolve(const std::string& name) {
@@ -17,6 +20,7 @@ namespace CircCFGInterp {
 			else if (outer) {
 				return outer->resolve(name);
 			}
+			
 			throw std::runtime_error("Variable not found: " + name);
 		}
 

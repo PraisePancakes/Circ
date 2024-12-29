@@ -16,13 +16,9 @@ int main() {
 
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
-   
-    auto v = cfgl.CFGAttr<double>({ "test" });
-    
-    std::cout << v;
- 
-   
-   
+    double d = cfgl.CFGAttr<double>({ "rest",  "s"});
+    std::cout << d;
+  
 
     return 0;
 }

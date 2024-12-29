@@ -67,9 +67,9 @@ namespace CircCFGInterp {
 
 	
 
-	class Interpreter : public ExpressionVisitor {
+	class Interpreter : public ExpressionVisitor, public StatementVisitor {
 
-	
+
 		bool is_truthy(std::any obj) const {
 			if (!obj.has_value()) {
 				return false;
@@ -77,40 +77,26 @@ namespace CircCFGInterp {
 			if (obj.type() == typeid(bool)) {
 				return std::any_cast<bool>(obj);
 			}
-			
+
 			return true;
 		}
-		
-		std::any visitDeclaration(Declaration* a) const override {
-			std::pair<std::string, std::any> pair;
-			pair.first = a->key;
-			pair.second = evaluate(a->value);
 
 
-			return pair;
-		};
-
-		std::any visitObject(Object* a) const override {
-			
-			std::map<std::string, std::any> members;
-			for (const auto& [key, value] : a->members) {
-				
-				members[key] = evaluate(value);
-			}
-			Environment* env = new Environment(members);
-			env->outer = level;
-			level = env;
-			return env;
-		};
-
-		std::any visitArray(Array * a) const override {
+		std::any visitArray(Array* a) const override {
 			std::vector<std::any> arr;
 			for (BaseExpression* i : a->arr) {
-					Literal* literal = (Literal*)i;
-					std::any v = evaluate(literal);
-					arr.push_back(v);
+				Literal* literal = (Literal*)i;
+				std::any v = evaluate(literal);
+				arr.push_back(v);
 			}
-				return arr;
+			return arr;
+		}
+
+
+		std::any visitAssignment(Assignment* a)const override {
+			std::any r = evaluate(a->v);
+			env->assign(a->k, r);
+			return r;
 		}
 
 
@@ -139,21 +125,21 @@ namespace CircCFGInterp {
 		-val
 		!(val + val1)
 		-(val + val1)
-	
+
 		*/
 		std::any visitGrouping(Grouping* gr) const override {
 			return evaluate(gr->g);
 		}
 
 		std::any visitUnary(Unary* u) const override {
-			
+
 			std::any r = evaluate(u->r);
-			
+
 			if (u->op == TOK_BANG) {
 				return !(is_truthy(r));
 			}
 			if (u->op == TOK_MINUS) {
-				
+
 				return std::any_cast<double>(r) * -1;
 			}
 			return nullptr;
@@ -164,32 +150,73 @@ namespace CircCFGInterp {
 				return std::any_cast<double>(l->lit);
 			}
 			if (l->lit.type() == typeid(std::string)) {
-				
+
 				return std::any_cast<std::string>(l->lit);
 			}
 
-			
+
 			return nullptr;
 		};
-		BaseExpression* ast;
-	public:
-		inline static Environment* level = nullptr;
-		Interpreter(const std::string& cfg_path) {
-			Lexer l(cfg_path);
+
+		std::any visitObject(Object* o) const override {
+			std::map<std::string, std::any> members;
+			for (const auto& [key, value] : o->members) {
+				std::any v = evaluate(value);
+				members[key] = v;
+			}
+
+			Environment* new_env = new Environment(members, env);
+			env = new_env;
+			
+			return new_env;
+		}
+
 		
+
+		std::any visitVariable(Variable* v) const override {
+			return env->resolve(v->name);
+		}
+
+		
+		std::any visitDecl(Decl* d) override {
+			std::any val = nullptr;
+			
+			if (d->value) {
+				val = evaluate(d->value);
+			}
+			env->members.insert(std::pair<std::string, std::any>(d->key, val));
+			return nullptr;
+		}
+
+		std::any execute(BaseStatement* s) {
+			return s->accept(this);
+		}
+
+		std::vector<BaseStatement*> stree;
+	public:
+		inline static Environment* glob = new Environment();
+		inline static Environment* env;
+		Interpreter(const std::string& cfg_path) {
+			
+			env = glob;
+			Lexer l(cfg_path);
 			Parser p(l.tokens);
 			
-			ast = p.ast;
-			evaluate(ast);
+			stree = p.statements;
+			try {
+				for (auto& s : stree) {
+					execute(s);
+				}
+			}
+			catch (std::exception& e) {
+				std::cerr << e.what() << std::endl;
+			}
+			
 		};
-		BaseExpression* astree() const {
-			return ast;
-		}
+		
 		std::any evaluate(BaseExpression* e) const {
 			std::any v = e->accept(*this);
-			
 			return v;
-		
 		};
 
 

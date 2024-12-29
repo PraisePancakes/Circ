@@ -7,23 +7,25 @@
 namespace CircCFGInterp {
 
 	struct Literal;
-	struct Declaration;
 	struct Binary;
 	struct Unary;
-	struct Object;
 	struct Grouping;
 	struct Array;
+	struct Assignment;
+	struct Variable;
+	struct Object;
 
 	/*
 		ExpressionVisitor and the different expression types
 	*/
 	struct ExpressionVisitor {
 		virtual std::any visitLiteral(Literal* l) const = 0;
-		virtual std::any visitDeclaration(Declaration* a) const = 0;
+		virtual std::any visitAssignment(Assignment* a) const = 0;
 		virtual std::any visitBinary(Binary* b) const = 0;
 		virtual std::any visitUnary(Unary* u) const = 0;
-		virtual std::any visitObject(Object* u) const = 0;
+		virtual std::any visitVariable(Variable* v) const = 0;
 		virtual std::any visitGrouping(Grouping* g) const = 0;
+		virtual std::any visitObject(Object* u) const = 0;
 		virtual std::any visitArray(Array* a) const = 0;
 
 	};
@@ -34,17 +36,35 @@ namespace CircCFGInterp {
 		~BaseExpression() {};
 	};
 
-
-
-	struct Declaration : public BaseExpression {
-		std::string key;
-		BaseExpression* value;
-		Declaration(const std::string& s, BaseExpression* v) : key(s), value(v) {};
-		std::any accept(const ExpressionVisitor& v) override {
-			return v.visitDeclaration(this); //look up env key, if this key is already inserted, update the value, else insert
-		};
-		~Declaration() {};
+	struct Assignment : public BaseExpression {
+		std::string k;
+		BaseExpression* v;
+		Assignment(std::string k, BaseExpression* v) : k(k), v(v) {};
+		std::any accept(const ExpressionVisitor& v)  override {
+			return v.visitAssignment(this);
+		}
+		~Assignment() {};
 	};
+
+	struct Object : public BaseExpression {
+		std::map<std::string, BaseExpression*> members;
+		Object(std::map<std::string, BaseExpression*> m) : members(m) {};
+		std::any accept(const ExpressionVisitor& v) override {
+			return v.visitObject(this);
+		}
+		~Object() {};
+	};
+
+	struct Variable : public BaseExpression {
+		std::string name;
+		Variable(const std::string& n) : name(n) {};
+		std::any accept(const ExpressionVisitor& v) override {
+			return v.visitVariable(this);
+		}
+		~Variable() {};
+	};
+
+
 	struct Literal : public BaseExpression { 
 		std::any lit;
 
@@ -77,15 +97,6 @@ namespace CircCFGInterp {
 			return v.visitUnary(this);
 		}
 		~Unary() {};
-	};
-
-	struct Object : public BaseExpression {
-		std::map<std::string, BaseExpression*> members;
-		Object(std::map<std::string, BaseExpression*> m) : members(m) {};
-		std::any accept(const ExpressionVisitor& v) override {
-			return v.visitObject(this);
-		}
-		~Object() {};
 	};
 
 	struct Array : public BaseExpression {

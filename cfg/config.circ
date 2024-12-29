@@ -1,5 +1,9 @@
 // @incorp CircMacs
-{
- $test : 4,
- $test2 : 5
-}
+
+ $rest : {
+	$t : 2,
+	b : {
+		$s : 6
+	},
+	$s : 5
+ }
