@@ -7,8 +7,6 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At this moment (12/18/2024) circ files are just plain text files.
 ## Usage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lets begin with the configuration language. Don't worry this is going to be an easy learn.
-### Entry :
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each Circ file has an entry point. create the entry object : ```{ }``` 
 ### Declaring a configuration variable :
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To assign a variable all you have to do is prefix the identifier with a ```$``` sign and assign it ```:``` to a value.
 A very simple file will look something like this.
@@ -18,18 +16,17 @@ A very simple file will look something like this.
 so do these...
 */
 //here is the entry
-{
 $some_var : 5
-}
+
 ```
 ### Different types :
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Circ currently supports three types of variables, double, string, and objects.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Circ currently supports four types of variables, double, string, object literals, and arrays.
 ```
-{
 $double : 5,
 $str : "string",
-$obj : { $x : 1, $y : 2 }
-}
+$obj : { $x : 1, $y : 2 },
+$arr : [0, 1, 2]
+
 ```
 Ok sweet! now we have some config variables, let's use them in some code!
 Starting off, let's create an instance of the API.
@@ -52,7 +49,6 @@ The config attribute (CFGAttr) function takes the type of the config variable as
 This function takes a list of strings starting with the outer-most key to the inner most key of the object.
 For example given this Circ file :
 ```
-{
  $obj : {
    $x : 1,  
    $y : 2,
@@ -61,7 +57,6 @@ For example given this Circ file :
      $iy : 4
    }
  }
-}
 ```
 
 To retrieve the ```$ix``` object-key you can do so :
@@ -80,13 +75,26 @@ for(auto& m : members) {
 }
 ```
 
+## Arrays
+std::any is a type-safe void* that allows for safe casts on an unknown type at runtime. 
+In the current implementation (due to change), you may access arrays in a simple two-step (working on one-step) procedure.
+First, all Circ arrays will return a std::vector<std::any>> type.
+```c++
+auto v = cfgl.CFGAttr<std::vector<std::any>>({ "arr" });
+``` 
+Second, access the element in the array via std::any_cast<T> where T is the type of the array, Mismatch types are an exception and will raise a runtime error.
+```c++
+auto el = std::any_cast<double>(v[0]);
+std::cout << el;
+```
+
+
 That's it! Well... for now, I am still working hard every day to better this project.
 ### IN THE WORKS 
- 1. Easier object property retrieval.
- 2. Using variable substitution for values.
- 3. Multi-file modules
- 4. Keywords and API functions that incorporate Raylib.
- 5. Arrays and other data types.
+ 1. Using variable substitution for values.
+ 2. Multi-file modules
+ 3. Keywords and API functions that incorporate Raylib.
+ 4. One-step array retrieval.
 
 ## Building
 This project is built using CMake on MSVS2022, ISO C++20 Standard, with the latest version of Raylib. 
