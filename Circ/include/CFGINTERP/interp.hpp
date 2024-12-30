@@ -84,11 +84,21 @@ namespace CircCFGInterp {
 
 		std::any visitArray(Array* a) const override {
 			std::vector<std::any> arr;
+			if (a->arr.size() == 0) {
+				return arr;
+			}
+
+			std::any t = evaluate(a->arr[0]);
+
 			for (BaseExpression* i : a->arr) {
 				Literal* literal = (Literal*)i;
 				std::any v = evaluate(literal);
+				if (t.type().hash_code() != v.type().hash_code()) {
+					throw std::runtime_error("Array type mismatch.");
+				}
 				arr.push_back(v);
 			}
+
 			return arr;
 		}
 

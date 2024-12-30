@@ -74,6 +74,16 @@ namespace CircCFGInterp {
 				return o;
 			}
 
+			if (match({ TOK_LBRAC })) {
+				BaseExpression* arr = array();
+				if (!match({ TOK_RBRAC })) {
+					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ']'");
+					throw std::runtime_error("");
+				}
+				Array* a = (Array*)arr;
+				return a;
+			}
+
 			
 
 			ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Expected a primary expression.");
@@ -90,7 +100,26 @@ namespace CircCFGInterp {
 			return primary();
 		};
 		//grouping : $window_width : (a + b) - c,
+		BaseExpression* array() {
+			std::vector<BaseExpression*> elems;
+			while (parser_peek().t != TOK_RBRAC && !is_end()) {
+				BaseExpression* e = term();
+				if (parser_peek().t != TOK_RBRAC) {
+					if (!match({ TOK_COMMA })) {
+						ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing , in array");
+						throw std::runtime_error("");
+					}
+				}
+				
+				elems.push_back(e);
+			}
+			if (parser_peek().t == TOK_RBRAC && parser_previous().t == TOK_COMMA) {
+				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "trailing comma");
+				throw std::runtime_error("");
+				}
 
+			return new Array(elems);
+		}
 
 		
 
@@ -129,6 +158,7 @@ namespace CircCFGInterp {
 			advance();
 			while (!is_end())
 			{
+				std::cout << parser_peek().word << std::endl;
 				// parser ignores until the next statement is found, if and only if the previous statement throws an exception. Panic mode recovery allows for the parser to catch up to the next correct rule discarding all previous false rules.
 				if (parser_previous().t == TOK_COMMA)
 				{
@@ -137,7 +167,9 @@ namespace CircCFGInterp {
 				switch (parser_peek().t)
 				{
 				case TOK_DOLLA:
+			
 					return;
+				
 				}
 				advance();
 			}
