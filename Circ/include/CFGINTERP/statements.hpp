@@ -3,6 +3,12 @@
 #include <vector>
 #include <iostream>
 #include "expressions.hpp"
+/**
+* The purpose of statements in the Circ parser is to separate execution of ast nodes from evaluation of other nodes.
+* When we execute a statement we can define which expression nodes needs to be evaluated within that statement.
+* Since we only allow for declarations in the Circ cfg language, statements are reduced to a Declaration.
+* Statements implementation is structured via a Visitor which allows for an easier REPL implementation.
+*/
 
 namespace CircCFGInterp {
 	struct Block;
@@ -12,7 +18,6 @@ namespace CircCFGInterp {
 
 	struct StatementVisitor {
 		virtual std::any visitDecl(Decl* d) = 0;
-		
 	};
 
 	struct BaseStatement {

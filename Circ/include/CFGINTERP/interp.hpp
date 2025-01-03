@@ -2,6 +2,7 @@
 #include "expressions.hpp"
 #include "env.hpp"
 #include "rdparser.hpp"
+#include "carch.hpp"
 
 namespace CircCFGInterp {
 	
@@ -206,23 +207,29 @@ namespace CircCFGInterp {
 	public:
 		inline static Environment* glob = new Environment();
 		inline static Environment* env;
+
 		Interpreter(const std::string& cfg_path) {
 			
 			env = glob;
 			Lexer l(cfg_path);
 			Parser p(l.tokens);
-			
+
 			stree = p.statements;
 			try {
 				for (auto& s : stree) {
 					execute(s);
 				}
+				
+				
 			}
 			catch (std::exception& e) {
 				std::cerr << e.what() << std::endl;
 			}
+
+
 			
 		};
+
 		
 		std::any evaluate(BaseExpression* e) const {
 			std::any v = e->accept(*this);

@@ -13,6 +13,8 @@ namespace CircCFGInterp {
 			
 		}
 
+
+
 		std::any resolve(const std::string& name) {
 			if (members.find(name) != members.end()) {
 				return members[name];

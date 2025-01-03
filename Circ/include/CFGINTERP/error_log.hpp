@@ -11,6 +11,7 @@ namespace CircCFGInterp {
 		UNKNOWN = 0,
 		WARNING,
 		SYNTAX,
+		RUNTIME_CAST,
 		ENTRY
 	};
 
@@ -18,6 +19,7 @@ namespace CircCFGInterp {
 		"UNKNOWN",
 		"WARNING",
 		"SYNTAX",
+		"RUNTIME_CAST",
 		"ENTRY"
 	};
 

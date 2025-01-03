@@ -10,15 +10,17 @@ void CustomLog(int msgType, const char* text, va_list args)
 {
     return;
 }
-
+/*
+    TO DO ARCHIVE (SERIALIZATION AND DESERIALIZATION)
+*/
 
 int main() {
 
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
     double d = cfgl.CFGAttr<double>({ "rest",  "x"});
-    auto v = cfgl.CFGAttr<std::vector<std::any>>({ "rest", "arr" });
-    std::cout << std::any_cast<double>(v[2]);
+    cfgl.CFGAttrSet<double>({"rest", "x"}, (double)4);
+    std::cout << cfgl.CFGAttr<double>({ "rest", "x" });
 
   
 
