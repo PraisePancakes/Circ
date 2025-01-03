@@ -51,6 +51,7 @@ namespace CircCFGInterp {
 		}
 
 		BaseExpression* primary() {
+			
 			if (match({ TOK_STRING, TOK_NUM })) {
 				return new Literal(parser_previous().lit);
 			}
@@ -158,7 +159,6 @@ namespace CircCFGInterp {
 			advance();
 			while (!is_end())
 			{
-				std::cout << parser_peek().word << std::endl;
 				// parser ignores until the next statement is found, if and only if the previous statement throws an exception. Panic mode recovery allows for the parser to catch up to the next correct rule discarding all previous false rules.
 				if (parser_previous().t == TOK_COMMA)
 				{

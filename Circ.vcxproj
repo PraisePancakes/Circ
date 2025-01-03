@@ -135,7 +135,6 @@
     <Text Include="cfg\config.circ" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Circ\include\CFGINTERP\carch.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\env.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\error_log.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\expressions.hpp" />

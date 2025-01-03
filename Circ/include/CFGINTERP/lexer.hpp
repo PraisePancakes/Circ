@@ -56,6 +56,13 @@ namespace CircCFGInterp {
 			return contents[end] == '\0' || end >= contents.length();
 		}
 
+		char prev() {
+			if (is_end()) {
+				return '\0';
+			}
+			return contents[end - 1];
+		};
+
 		char peek() {
 			if (is_end()) {
 				return '\0';
@@ -102,9 +109,15 @@ namespace CircCFGInterp {
 		void lex_string() {
 			std::string lit = "";
 			lit += advance();
-
+			std::cout << "here";
 			while (peek() != '\"' && !is_end()) {
+				
 				lit += advance();
+			}
+			
+			if (is_end()) {
+				
+				throw std::runtime_error("Open string");
 			}
 			advance();
 
@@ -132,10 +145,7 @@ namespace CircCFGInterp {
 				add_token(TOK_HASH);
 				break;
 			case ':':
-				if (advance() == ':') {
-					add_token(TOK_ENTRY);
-					break;
-				}
+				
 				add_token(TOK_COL);
 				break;
 			case '$':
