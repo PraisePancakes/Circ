@@ -10,22 +10,17 @@ namespace CircCFGInterp {
 	namespace Internal {
 		template<typename PolicyType>
 		class IBinaryPolicy {
-			PolicyType a;
-			typedef PolicyType::Type Type;
 		public:
-			IBinaryPolicy() {
-
-			};
-			Type evaluate_binary(std::any l, TokenType op, std::any r) {
-				return a.evaluate(l, op, r);
+			typedef PolicyType::Type Type;
+			static Type evaluate_binary(std::any l, TokenType op, std::any r) {
+				return PolicyType::evaluate(l, op, r);
 			}
-			~IBinaryPolicy() {};
+		
 		};
 
 		struct BDouble {
 			using Type = double;
-			BDouble() {};
-			Type evaluate(std::any l, TokenType op, std::any r) {
+			static Type evaluate(std::any l, TokenType op, std::any r) {
 				Type left = std::any_cast<Type>(l);
 				Type right = std::any_cast<Type>(r);
 				switch (op) {
@@ -42,13 +37,12 @@ namespace CircCFGInterp {
 
 				};
 			};
-			~BDouble() {};
+			
 		};
 
 		struct BString {
 			using Type = std::string;
-			BString() = default;
-			Type evaluate(std::any l, TokenType op, std::any r) {
+			static Type evaluate(std::any l, TokenType op, std::any r) {
 				Type left = std::any_cast<Type>(l);
 				Type right = std::any_cast<Type>(r);
 
@@ -60,7 +54,7 @@ namespace CircCFGInterp {
 				};
 
 			};
-			~BString() = default;
+			
 		};
 		
 
@@ -117,13 +111,13 @@ namespace CircCFGInterp {
 			TokenType op = b->op;
 
 			if (l.type() == typeid(double) && r.type() == typeid(double)) {
-				Internal::IBinaryPolicy<Internal::BDouble> d;
-				return d.evaluate_binary(l, op, r);
+				
+				return Internal::IBinaryPolicy<Internal::BDouble>::evaluate_binary(l, op, r);
 			}
 
 			if (l.type() == typeid(std::string) && r.type() == typeid(std::string)) {
 				Internal::IBinaryPolicy<Internal::BString> s;
-				return s.evaluate_binary(l, op, r);
+				return Internal::IBinaryPolicy<Internal::BString>::evaluate_binary(l, op, r);
 
 			}
 
