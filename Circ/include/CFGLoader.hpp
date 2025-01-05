@@ -53,6 +53,7 @@ namespace Circ {
             '}'
         };
 
+        typedef std::pair<int, std::string> var_info_t;
 
         template<typename VarType>
         struct ConstructionPolicy {
@@ -60,11 +61,13 @@ namespace Circ {
             std::any v;
             std::string k;
             type vt;
+
             ConstructionPolicy(std::string k, std::any v) {
                 this->v = v;
                 this->k = k;
              }
-            std::pair<int, std::string> construct() {
+           
+            var_info_t construct() {
                 return vt.construct(k, v);
             }
             ~ConstructionPolicy() {};
@@ -74,19 +77,22 @@ namespace Circ {
 
         struct VarTypeDouble 
         {
-         
-           
+        private:
+            [[nodiscard]] std::string construct_serializable(std::string k, std::string str_lit) const noexcept {
+               return (construction_lookup[CT::DOLLA]
+                    + k
+                    + construction_lookup[CT::COL]
+                    + str_lit
+                    + construction_lookup[CT::COMMA]
+                    + construction_lookup[CT::NEW_LINE]);
+            };
+        public:
             VarTypeDouble() {};
-           [[nodiscard]] std::pair<int, std::string> construct(std::string key, std::any value) const {
+           [[nodiscard]] var_info_t construct(std::string key, std::any value) const noexcept {
                double v = std::any_cast<double>(value);
                std::string str_lit = std::to_string(v);
                int byte_size = 0;
-               std::string serializable = construction_lookup[CT::DOLLA] 
-                                          + key 
-                                          + construction_lookup[CT::COL] 
-                                          + str_lit 
-                                          + construction_lookup[CT::COMMA]
-                                          + construction_lookup[CT::NEW_LINE];
+               std::string serializable = construct_serializable(key, str_lit);
                byte_size += serializable.length();
                return { byte_size , serializable };
 
@@ -97,19 +103,23 @@ namespace Circ {
 
         struct VarTypeString 
         {
-            VarTypeString() {};
-            [[nodiscard]] std::pair<int, std::string> construct(std::string key, std::any value) const {
-                std::string str_lit = std::any_cast<std::string>(value);
-                int byte_size = 0;
-                std::string serializable = construction_lookup[CT::DOLLA]
-                    + key
+        private:
+            [[nodiscard]] std::string construct_serializable(std::string k, std::string str_lit) const noexcept {
+               return (construction_lookup[CT::DOLLA]
+                    + k
                     + construction_lookup[CT::COL]
                     + construction_lookup[CT::QUOTE]
                     + str_lit
                     + construction_lookup[CT::QUOTE]
                     + construction_lookup[CT::COMMA]
-                    + construction_lookup[CT::NEW_LINE];
-               
+                    + construction_lookup[CT::NEW_LINE]);
+            };
+        public:
+            VarTypeString() {};
+            [[nodiscard]] var_info_t construct(std::string key, std::any value) const noexcept {
+                std::string str_lit = std::any_cast<std::string>(value);
+                int byte_size = 0;
+                std::string serializable = construct_serializable(key, str_lit);
                 byte_size += serializable.length();
                 return { byte_size  , serializable };
 
@@ -126,10 +136,7 @@ namespace Circ {
         };
 
 
-        std::pair<int, std::string> construct_variable(std::string key, std::any value) {
-         
-            std::pair<int, std::string> var_info = {};
-            
+        var_info_t construct_variable(std::string key, std::any value) {
             if (value.type() == typeid(double)) {
                 ConstructionPolicy<VarTypeDouble> vcp(key, value);
                 return vcp.construct();
