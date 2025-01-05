@@ -32,7 +32,28 @@ namespace Circ {
 
 
         };
-        
+
+        enum CT {
+            DOLLA,
+            COL,
+            COMMA,
+            NEW_LINE,
+            QUOTE,
+            LCURL,
+            RCURL
+        };
+
+        const inline static std::vector<char> construction_lookup = {
+            '$',
+            ':',
+            ',',
+            '\n',
+            '\"',
+            '{',
+            '}'
+        };
+
+
         template<typename VarType>
         struct ConstructionPolicy {
             typedef VarType type;
@@ -53,22 +74,21 @@ namespace Circ {
 
         struct VarTypeDouble 
         {
-            const std::string dolla = "$";
-            const std::string col = ":";
-            const std::string com = ",";
+         
            
             VarTypeDouble() {};
            [[nodiscard]] std::pair<int, std::string> construct(std::string key, std::any value) const {
                double v = std::any_cast<double>(value);
                std::string str_lit = std::to_string(v);
                int byte_size = 0;
-               byte_size += col.length();
-               byte_size += key.length();
-               byte_size += str_lit.length();
-               byte_size += com.length();
-               
-               std::string serializable = dolla + key + col + str_lit + com;
-               return { byte_size + 1, serializable };
+               std::string serializable = construction_lookup[CT::DOLLA] 
+                                          + key 
+                                          + construction_lookup[CT::COL] 
+                                          + str_lit 
+                                          + construction_lookup[CT::COMMA]
+                                          + construction_lookup[CT::NEW_LINE];
+               byte_size += serializable.length();
+               return { byte_size , serializable };
 
            };
            ~VarTypeDouble() {};
@@ -77,26 +97,32 @@ namespace Circ {
 
         struct VarTypeString 
         {
-          
-             const std::string dolla = "$";
-             const std::string col = ":";
-             const std::string com = ",";
-             const std::string quote = "\"";
-            
             VarTypeString() {};
             [[nodiscard]] std::pair<int, std::string> construct(std::string key, std::any value) const {
                 std::string str_lit = std::any_cast<std::string>(value);
                 int byte_size = 0;
-                byte_size += key.length();
-                byte_size += str_lit.length();
-                byte_size += quote.length() * 2;
-                byte_size += com.length();
+                std::string serializable = construction_lookup[CT::DOLLA]
+                    + key
+                    + construction_lookup[CT::COL]
+                    + construction_lookup[CT::QUOTE]
+                    + str_lit
+                    + construction_lookup[CT::QUOTE]
+                    + construction_lookup[CT::COMMA]
+                    + construction_lookup[CT::NEW_LINE];
                
-                std::string serializable = dolla + key + col + quote + str_lit + quote + com;
-                return { byte_size + 1, serializable };
+                byte_size += serializable.length();
+                return { byte_size  , serializable };
 
             };
             ~VarTypeString() {};
+        };
+
+
+        class VarTypeObject {
+            const std::string dolla = "$";
+            const std::string col = ":";
+            const std::string com = ",";
+            const std::string quote = "\"";
         };
 
 
