@@ -120,6 +120,7 @@ That's it! Well... for now, I am still working hard every day to better this pro
  2. Multi-file modules
  3. Keywords and API functions that incorporate Raylib.
  4. One-step array retrieval.
+ 5. Serialization formatting.
 
 ## Building
 This project is built using CMake on MSVS2022, ISO C++20 Standard, with the latest version of Raylib. 
