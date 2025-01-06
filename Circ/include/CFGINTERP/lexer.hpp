@@ -109,7 +109,6 @@ namespace CircCFGInterp {
 		void lex_string() {
 			std::string lit = "";
 			lit += advance();
-			std::cout << "here";
 			while (peek() != '\"' && !is_end()) {
 				
 				lit += advance();

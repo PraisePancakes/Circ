@@ -64,6 +64,47 @@ namespace Circ {
             ~IConstructionPolicy() {};
         };
 
+        struct VarTypeObject {
+        public:
+            [[nodiscard]] static std::string construct_serializable(std::string key, std::any value) noexcept {
+                CircCFGInterp::Environment* env = std::any_cast<CircCFGInterp::Environment*>(value);
+                std::string ret = 
+                    construction_lookup[CT::DOLLA] 
+                    + key 
+                    + construction_lookup[CT::COL] 
+                    + construction_lookup[CT::LCURL]
+                    +construction_lookup[CT::NEW_LINE];
+                
+                for (auto it = env->members.rbegin(); it != env->members.rend(); ++it) {
+                    std::string k = it->first;
+                    std::any v = it->second;
+                  
+                    if (v.type() == typeid(double)) {
+                       ret += IConstructionPolicy<VarTypeDouble>::construct(k, v).second;
+                    }
+                    if (v.type() == typeid(std::string)) {
+                        ret += IConstructionPolicy<VarTypeString>::construct(k, v).second;
+                    }
+
+                    if (v.type() == typeid(CircCFGInterp::Environment*)) {
+                        ret += construct_serializable(k, v);
+                    }
+                };
+                ret += construction_lookup[CT::RCURL];
+                ret += construction_lookup[CT::COMMA];
+                ret += construction_lookup[CT::NEW_LINE];
+               
+                return ret;
+            };
+            [[nodiscard]] static var_info_t construct(std::string key, std::any value) noexcept {
+                int byte_size = 0;
+                std::string serializable = construct_serializable(key, value);
+                byte_size += serializable.length();
+                
+                return { byte_size , serializable };
+            };
+        };
+
         struct VarTypeDouble 
         {
         public:
@@ -75,7 +116,6 @@ namespace Circ {
                     + construction_lookup[CT::COMMA]
                     + construction_lookup[CT::NEW_LINE]);
             };
-            VarTypeDouble() {};
            [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
                double v = std::any_cast<double>(value);
                std::string str_lit = std::to_string(v);
@@ -85,16 +125,13 @@ namespace Circ {
                return { byte_size , serializable };
 
            };
-           ~VarTypeDouble() {};
+          
            
         };
 
         struct VarTypeString 
         {
-      
-          
         public:
-            VarTypeString() {};
             [[nodiscard]] static std::string construct_serializable(std::string k, std::string str_lit)  noexcept {
                 return (construction_lookup[CT::DOLLA]
                     + k
@@ -111,38 +148,26 @@ namespace Circ {
                 int byte_size = 0;
                 std::string serializable = construct_serializable(key, str_lit);
                 byte_size += serializable.length();
-                
                 return { byte_size  , serializable };
 
             };
-            ~VarTypeString() {};
         };
 
         var_info_t construct_variable(std::string key, std::any value) {
             if (value.type() == typeid(double)) {
                 return IConstructionPolicy<VarTypeDouble>::construct(key, value);
             }
-            else {
+            else if (value.type() == typeid(std::string)) {
                 return IConstructionPolicy<VarTypeString>::construct(key, value);
             }
-          
-
-           
-           
+            else {
+                //object
+                
+                return IConstructionPolicy<VarTypeObject>::construct(key, value);
+            }
         }
 
-        void serialize() {
-            CircCFGInterp::Environment* global = this->interp->glob;
-            std::ofstream ofs(cfg_path, std::ios::trunc);
-
-            for (auto it = global->members.rbegin(); it != global->members.rend(); it++) {
-                //first = byte_size
-                //second = serializable text
-                std::pair<int, std::string> var_info = construct_variable(it->first, it->second);
-                ofs.write(var_info.second.c_str(), var_info.first);
-            }
-            ofs.close();
-        };
+     
  
 
     public:
@@ -160,11 +185,36 @@ namespace Circ {
            
         };
         
+        void Serialize() {
+            CircCFGInterp::Environment* env = this->interp->glob;
+            std::ofstream ofs(cfg_path, std::ios::trunc | std::ios::out);
+            std::cout << env->members.size() << " : " << interp->glob->members.size();
+            while (env) {
+                for (auto it = env->members.rbegin(); it != env->members.rend(); it++) {
+                    /*
+                        problem : 
+                        after construct_variable() calls object type it changes the env
+                        which causes the inner env to duplicate into the outer since this
+                        loop needs to finish.
+                        solution : 
+                        pass environment to construct function such that we can construct env by env
+                    */
+
+                    var_info_t var_info = construct_variable(it->first, it->second);
+                    ofs.write(var_info.second.c_str(), var_info.first);
+                }
+                env = env->outer;
+
+            }
+                
+          
+
+            ofs.close();
+        };
 
         template<typename AttrType>
         void CFGAttrSet(std::initializer_list<std::string> kp, const std::any& v) {
             try {
-                AttrType check_type = CFGAttr<AttrType>(kp);
                 CircCFGInterp::Environment* current = interp->env;
                 std::any value;
                 const std::string last_key = kp.begin()[kp.size() - 1];
@@ -247,7 +297,7 @@ namespace Circ {
 
        
         ~CFGLoader() {
-            serialize();
+          
         };
     };
 }

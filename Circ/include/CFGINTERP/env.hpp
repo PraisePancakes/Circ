@@ -25,6 +25,15 @@ namespace CircCFGInterp {
 			
 			throw std::runtime_error("Variable not found: " + name);
 		}
+		void insert(const std::string& k, const std::any& v) {
+			std::cout << k << std::endl;
+			if (members.find(k) == members.end()) {
+				members.insert(std::pair<std::string, const std::any&>(k, v));
+			}
+			else {
+				assign(k, v);
+			}
+		}
 
 		void assign(const std::string& name, const std::any& value) {
 			if (members.find(name) != members.end()) {

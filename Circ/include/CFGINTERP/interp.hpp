@@ -167,12 +167,9 @@ namespace CircCFGInterp {
 			std::map<std::string, std::any> members;
 			for (const auto& [key, value] : o->members) {
 				std::any v = evaluate(value);
-				members[key] = v;
+				members.insert({ key, v });
 			}
-
 			Environment* new_env = new Environment(members, env);
-			env = new_env;
-			
 			return new_env;
 		}
 
@@ -188,8 +185,15 @@ namespace CircCFGInterp {
 			
 			if (d->value) {
 				val = evaluate(d->value);
+				if (val.type() == typeid(Environment*)) {
+					Environment* new_env = std::any_cast<Environment*>(val);
+					new_env->outer = env;
+					env->insert(d->key, val);
+					env = new_env;
+					return nullptr;
+				}
 			}
-			env->members.insert(std::pair<std::string, std::any>(d->key, val));
+			env->insert(d->key, val);
 			return nullptr;
 		}
 
@@ -200,11 +204,11 @@ namespace CircCFGInterp {
 		std::vector<BaseStatement*> stree;
 	public:
 		inline static Environment* glob = new Environment();
-		inline static Environment* env;
+		inline static Environment* env = nullptr;
 
 		Interpreter(const std::string& cfg_path) {
-			
 			env = glob;
+			
 			Lexer l(cfg_path);
 			Parser p(l.tokens);
 
