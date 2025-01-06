@@ -4,7 +4,7 @@
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Programming advanced graphical applications can be very messy. Let's clean that up a little. With Circ, you can keep all your environment variables (objects, int, string, etc..) in a separate file and just look up these constants using the Circ config loader API!
 
 ### Setting up a Circ file
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At this moment (12/18/2024) circ files are just plain text files.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Create a file with the .Circ extension ``` file.Circ ```.
 ## Usage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lets begin with the configuration language. Don't worry this is going to be an easy learn.
 ### Declaring a configuration variable :
