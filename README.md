@@ -90,9 +90,8 @@ std::cout << el;
 
 # Serialization
 DISCLAIMER : In the current version of Circ the following types are NOT serializable
-- Arrays
-attempting to serialize with arrays in the Circ file will erase the entire array.
-Array serialization is coming very soon.
+-char*
+
 
 ## Setting members.
 You can set the values of members like so :
@@ -112,7 +111,6 @@ cfgl.CFGAttrSet<double>(key_path, 5.00);
 cfgl.Serialize();
 //the value at key_path is now serialized to the Circ config file.
 ```
-Please remember that at this current point in time, the serialization of arrays is dangerous and will result in the array being deleted from the file. (Coming very soon!).
 
 That's it! Well... for now, I am still working hard every day to better this project.
 ### IN THE WORKS 
@@ -121,6 +119,7 @@ That's it! Well... for now, I am still working hard every day to better this pro
  3. Keywords and API functions that incorporate Raylib.
  4. One-step array retrieval.
  5. Serialization formatting.
+ 6. More types!
 
 ## Building
 This project is built using CMake on MSVS2022, ISO C++20 Standard, with the latest version of Raylib. 
