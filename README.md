@@ -4,11 +4,11 @@
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Programming advanced graphical applications can be very messy. Let's clean that up a little. With Circ, you can keep all your environment variables (objects, int, string, etc..) in a separate file and just look up these constants using the Circ config loader API!
 
 ### Setting up a Circ file
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At this moment (12/18/2024) circ files are just plain text files.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Create a file with the .Circ extension ``` file.Circ ```.
 ## Usage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lets begin with the configuration language. Don't worry this is going to be an easy learn.
 ### Declaring a configuration variable :
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To assign a variable all you have to do is prefix the identifier with a ```$``` sign and assign it ```:``` to a value.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; To assign a variable all you have to do is prefix the identifier with a ```$``` sign and assign it ```:``` to a value.
 A very simple file will look something like this.
 ```
 //comments work too!
@@ -20,7 +20,7 @@ $some_var : 5
 
 ```
 ### Different types :
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Circ currently supports four types of variables, double, string, object literals, and arrays.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Circ currently supports four types of variables, double, string, object literals, and arrays.
 ```
 $double : 5,
 $str : "string",
@@ -46,7 +46,7 @@ The config attribute (CFGAttr) function takes the type of the config variable as
         template<typename WrapperType>
         WrapperType CFGAttr(std::initializer_list<std::string> key_path)
 ```
-This function takes a list of strings starting with the outer-most key to the inner most key of the object.
+This function takes a list of strings starting with the outer-most key to the innermost key of the object.
 For example given this Circ file :
 ```
  $obj : {
@@ -88,6 +88,31 @@ auto el = std::any_cast<double>(v[0]);
 std::cout << el;
 ```
 
+# Serialization
+DISCLAIMER : In the current version of Circ the following types are NOT serializable
+- Arrays
+attempting to serialize with arrays in the Circ file will erase the entire array.
+Array serialization is coming very soon.
+
+## Setting members.
+You can set the values of members like so :
+```c++
+ std::initializer_list<std::string> key_path = {"some", "member", "test"};
+ Circ::CFGLoader cfgl(cfg_path);
+ cfgl.CFGAttrSet<double>(key_path, 5.00);
+ //the value at key_path is now 5.00
+```
+## Serializing members.
+In Circ Serialization is an explicit call, to serialize members that change or remain constant, do so.
+```c++
+std::initializer_list<std::string> key_path = {"re", "a", "test"};
+Circ::CFGLoader cfgl(cfg_path);
+cfgl.CFGAttrSet<double>(key_path, 5.00);
+// the value at key_path is now 5.00
+cfgl.Serialize();
+//the value at key_path is now serialized to the Circ config file.
+```
+Please remember that at this current point in time, the serialization of arrays is dangerous and will result in the array being deleted from the file. (Coming very soon!).
 
 That's it! Well... for now, I am still working hard every day to better this project.
 ### IN THE WORKS 
@@ -95,6 +120,7 @@ That's it! Well... for now, I am still working hard every day to better this pro
  2. Multi-file modules
  3. Keywords and API functions that incorporate Raylib.
  4. One-step array retrieval.
+ 5. Serialization formatting.
 
 ## Building
 This project is built using CMake on MSVS2022, ISO C++20 Standard, with the latest version of Raylib. 
