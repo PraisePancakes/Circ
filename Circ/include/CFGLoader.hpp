@@ -40,7 +40,9 @@ namespace Circ {
             NEW_LINE,
             QUOTE,
             LCURL,
-            RCURL
+            RCURL,
+            LBRAC,
+            RBRAC
         };
 
         const inline static std::vector<char> construction_lookup = {
@@ -50,7 +52,9 @@ namespace Circ {
             '\n',
             '\"',
             '{',
-            '}'
+            '}',
+            '[',
+            ']'
         };
 
         typedef std::pair<int, std::string> var_info_t;
@@ -62,6 +66,68 @@ namespace Circ {
                 return VarType::construct(k, v);
             }
             ~IConstructionPolicy() {};
+        };
+
+        struct VarTypeArray {
+            [[nodiscard]] static std::string construct_array(std::any value) noexcept {
+
+                std::string ret = ""; 
+                ret += construction_lookup[CT::LBRAC];
+
+                std::vector<std::any> arr = std::any_cast<std::vector<std::any>>(value);
+                for (size_t i = 0; i < arr.size(); i++) {
+                    std::any v = arr[i];
+
+                    if (v.type() == typeid(double)) {
+                        double e = std::any_cast<double>(v);
+                        ret += std::to_string(e);
+                        
+                    }
+                    else if (v.type() == typeid(std::string)) {
+                        std::string e = std::any_cast<std::string>(v);
+                        ret += construction_lookup[CT::QUOTE];
+                        ret += e;
+                        ret += construction_lookup[CT::QUOTE];
+                    }
+                    else if (v.type() == typeid(std::vector<std::any>)) {
+                        ret += construct_array(v);
+                       
+                    } if (v.type() == typeid(int)) {
+                        int e = std::any_cast<int>(v);
+                        ret += std::to_string(e);
+                     
+                    }
+                    if (i < arr.size() - 1) {
+                        ret += construction_lookup[CT::COMMA];
+                    }
+
+                }
+
+                ret += construction_lookup[CT::RBRAC];
+                return ret;
+            };
+
+        public:
+            [[nodiscard]] static std::string construct_serializable(std::string key, std::any value) noexcept {
+             
+                std::string ret =
+                    construction_lookup[CT::DOLLA]
+                    + key
+                    + construction_lookup[CT::COL];
+                   
+                ret += construct_array(value);
+                ret += construction_lookup[CT::COMMA];
+                ret += construction_lookup[CT::NEW_LINE];
+                
+                return ret;
+            };
+            [[nodiscard]] static var_info_t construct(std::string key, std::any value) noexcept {
+                int byte_size = 0;
+                std::string serializable = construct_serializable(key, value);
+                byte_size += serializable.length();
+
+                return { byte_size , serializable };
+            };
         };
 
         struct VarTypeObject {
@@ -160,10 +226,15 @@ namespace Circ {
             else if (value.type() == typeid(std::string)) {
                 return IConstructionPolicy<VarTypeString>::construct(key, value);
             }
-            else {
+            else if(value.type() == typeid(CircCFGInterp::Environment*)) {
                 //object
                 
                 return IConstructionPolicy<VarTypeObject>::construct(key, value);
+            }
+            else if (value.type() == typeid(std::vector<std::any>)) {
+                //arrays
+                return IConstructionPolicy<VarTypeArray>::construct(key, value);
+                
             }
         }
 
@@ -191,15 +262,6 @@ namespace Circ {
             std::cout << env->members.size() << " : " << interp->glob->members.size();
             while (env) {
                 for (auto it = env->members.rbegin(); it != env->members.rend(); it++) {
-                    /*
-                        problem : 
-                        after construct_variable() calls object type it changes the env
-                        which causes the inner env to duplicate into the outer since this
-                        loop needs to finish.
-                        solution : 
-                        pass environment to construct function such that we can construct env by env
-                    */
-
                     var_info_t var_info = construct_variable(it->first, it->second);
                     ofs.write(var_info.second.c_str(), var_info.first);
                 }

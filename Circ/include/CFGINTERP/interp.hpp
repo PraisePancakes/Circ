@@ -75,7 +75,16 @@ namespace CircCFGInterp {
 
 			return true;
 		}
+		bool known_type(std::any v) const {
+			if (v.type() == typeid(double) 
+				|| v.type() == typeid(std::string) 
+				|| v.type() == typeid(std::vector<std::any>)) {
+				return true;
+			}
 
+			throw std::runtime_error("Uknown array type");
+			
+		}
 
 		std::any visitArray(Array* a) const override {
 			std::vector<std::any> arr;
@@ -88,8 +97,11 @@ namespace CircCFGInterp {
 			for (BaseExpression* i : a->arr) {
 				Literal* literal = (Literal*)i;
 				std::any v = evaluate(literal);
-				if (t.type().hash_code() != v.type().hash_code()) {
-					throw std::runtime_error("Array type mismatch.");
+				if (known_type(v)) {
+					if (t.type().hash_code() != v.type().hash_code()) {
+						throw std::runtime_error("Array type mismatch.");
+					}
+					
 				}
 				arr.push_back(v);
 			}
