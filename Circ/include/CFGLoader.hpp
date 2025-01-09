@@ -151,6 +151,9 @@ namespace Circ {
                     if (v.type() == typeid(std::string)) {
                         ret += IConstructionPolicy<VarTypeString>::construct(k, v).second;
                     }
+                    if (v.type() == typeid(int)) {
+                        ret += IConstructionPolicy<VarTypeInt>::construct(k, v).second;
+                    }
 
                     if (v.type() == typeid(CircCFGInterp::Environment*)) {
                         ret += construct_serializable(k, v);
@@ -241,6 +244,7 @@ namespace Circ {
 
         var_info_t construct_variable(std::string key, std::any value) {
             if (value.type() == typeid(double)) {
+               
                 return IConstructionPolicy<VarTypeDouble>::construct(key, value);
             }
             else if (value.type() == typeid(std::string)) {
@@ -257,6 +261,7 @@ namespace Circ {
                 
             }
             else if (value.type() == typeid(int)) {
+                
                 return IConstructionPolicy<VarTypeInt>::construct(key, value);
             }
         }
@@ -313,12 +318,18 @@ namespace Circ {
                         current = std::any_cast<CircCFGInterp::Environment*>(value);
                     }
                     
+                    
                 }
                 current->assign(last_key, v);
             }
             catch (std::exception& e) {
                 
                 std::cerr << e.what() << std::endl;
+                std::cerr << "Failed to assign at : " << std::endl;
+                for (auto s : kp) {
+                    std::cout << s << " => ";
+                }
+                std::cout << "NULL" << std::endl;
             }
            
             
