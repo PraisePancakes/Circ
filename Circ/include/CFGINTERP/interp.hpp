@@ -170,6 +170,9 @@ namespace CircCFGInterp {
 
 				return std::any_cast<std::string>(l->lit);
 			}
+			if (l->lit.type() == typeid(int)) {
+				return std::any_cast<int>(l->lit);
+			}
 
 
 			return nullptr;

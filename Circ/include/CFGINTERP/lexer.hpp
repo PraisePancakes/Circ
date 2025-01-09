@@ -100,11 +100,30 @@ namespace CircCFGInterp {
 		void lex_number() {
 			std::string num = "";
 			num += this->contents[end - 1];
-			while (isdigit(peek()) || peek() == '.') {
+			bool is_double = false;
+
+			while (isdigit(peek())) {
 				num += advance();
 			}
 
-			add_token(TOK_NUM, std::stod(num));
+			if (peek() == '.') {
+				is_double = true;
+				num += advance();
+				if (!isdigit(peek()) && is_double) {
+					num += '0';
+				}
+				while (isdigit(peek())) {
+					num += advance();
+				}
+			}
+
+			
+			if (is_double) {
+				add_token(TOK_NUM, std::stod(num));
+			}
+			else {
+				add_token(TOK_NUM, std::stoi(num));
+			}
 		};
 		void lex_string() {
 			std::string lit = "";

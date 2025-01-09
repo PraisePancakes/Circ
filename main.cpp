@@ -18,11 +18,12 @@ int main() {
     std::initializer_list<std::string> key_path = {"test"};
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
+    int x = cfgl.CFGAttr<int>("test");
+    cfgl.CFGAttrSet<int>({ "test" }, 4);
+    cfgl.Serialize();
     //SERIALIZATION check cfg file before and after setting
    
-    std::vector <std::any> v{ std::vector<std::any>{1}, std::vector<std::any>{0}, std::vector<std::any>{4, 2} };
-    cfgl.CFGAttrSet <std::vector<std::any>> (key_path,v);
-    cfgl.Serialize();
+  
 
   
 

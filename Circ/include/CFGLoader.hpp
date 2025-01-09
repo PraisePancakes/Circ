@@ -195,6 +195,26 @@ namespace Circ {
            
         };
 
+        struct VarTypeInt {
+            [[nodiscard]] static std::string construct_serializable(std::string k, std::string str_lit) noexcept {
+                return (construction_lookup[CT::DOLLA]
+                    + k
+                    + construction_lookup[CT::COL]
+                    + str_lit
+                    + construction_lookup[CT::COMMA]
+                    + construction_lookup[CT::NEW_LINE]);
+            };
+            [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
+                int v = std::any_cast<int>(value);
+                std::string str_lit = std::to_string(v);
+                int byte_size = 0;
+                std::string serializable = construct_serializable(key, str_lit);
+                byte_size += serializable.length();
+                return { byte_size , serializable };
+
+            };
+        };
+
         struct VarTypeString 
         {
         public:
@@ -235,6 +255,9 @@ namespace Circ {
                 //arrays
                 return IConstructionPolicy<VarTypeArray>::construct(key, value);
                 
+            }
+            else if (value.type() == typeid(int)) {
+                return IConstructionPolicy<VarTypeInt>::construct(key, value);
             }
         }
 
