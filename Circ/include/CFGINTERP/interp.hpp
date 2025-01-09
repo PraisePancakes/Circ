@@ -2,12 +2,27 @@
 #include "expressions.hpp"
 #include "env.hpp"
 #include "rdparser.hpp"
-
+/*
+* @why :
+*		The interpreter system is responsible for one thing and one thing only, 
+*	it converts the Circ file into usable objects in memory. The main purpose for the interpreter is to interpret values to the archive.
+*	The archive then takes these values and are accessed via the CFGLoader API
+* 
+* 
+**/
 
 namespace CircCFGInterp {
 	
 
 	namespace Internal {
+		/*
+		*
+		* @type :
+		*	The policy adapter takes a type in which can be evaluated in any if not all arithmetic manner.
+			This policy type then evaluates via its respsective arthimetic policy
+		* @params : 
+		*	passing the left expression, operator, and the right expression
+		**/
 		template<typename PolicyType>
 		class IBinaryPolicy {
 		public:
@@ -20,6 +35,7 @@ namespace CircCFGInterp {
 
 		struct BDouble {
 			using Type = double;
+		
 			static Type evaluate(std::any l, TokenType op, std::any r) {
 				Type left = std::any_cast<Type>(l);
 				Type right = std::any_cast<Type>(r);
@@ -223,24 +239,19 @@ namespace CircCFGInterp {
 
 		Interpreter(const std::string& cfg_path) {
 			env = glob;
-			
 			Lexer l(cfg_path);
 			Parser p(l.tokens);
-
 			stree = p.statements;
 			try {
 				for (auto& s : stree) {
 					execute(s);
 				}
 				
-				
 			}
 			catch (std::exception& e) {
 				std::cerr << e.what() << std::endl;
 			}
 
-
-			
 		};
 
 		

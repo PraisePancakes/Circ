@@ -19,7 +19,7 @@ int main() {
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
  
-    cfgl.CFGAttrSet<int>(key_path, 7);
+    cfgl.CFGAttrSet(key_path, 7);
 
     int x = cfgl.CFGAttr<int>(key_path);
     std::cout << x;
