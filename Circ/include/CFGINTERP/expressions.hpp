@@ -3,6 +3,8 @@
 #include <iostream>
 #include "lexer.hpp"
 #include <map>
+namespace Serialization {
+
 
 namespace CircCFGInterp {
 
@@ -119,4 +121,4 @@ namespace CircCFGInterp {
 		~Grouping() {};
 	};
 
-}
+}}

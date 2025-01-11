@@ -9,6 +9,8 @@
 * Since we only allow for declarations in the Circ cfg language, statements are reduced to a Declaration.
 * Statements implementation is structured via a Visitor which allows for an easier REPL implementation.
 */
+namespace Serialization {
+
 
 namespace CircCFGInterp {
 	struct Block;
@@ -38,4 +40,5 @@ namespace CircCFGInterp {
 	};
 
 	
+}
 }

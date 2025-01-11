@@ -61,6 +61,7 @@ namespace Serialization {
                     ret += construction_lookup[CT::QUOTE];
                 }
                 else if (v.type() == typeid(std::vector<std::any>)) {
+                    ret += construction_lookup[CT::NEW_LINE];
                     ret += construct_array(v);
 
                 } if (v.type() == typeid(int)) {
@@ -183,7 +184,7 @@ namespace Serialization {
                 + construction_lookup[CT::LCURL]
                 + construction_lookup[CT::NEW_LINE];
 
-            for (auto it = env->members.rbegin(); it != env->members.rend(); ++it) {
+            for (auto it = env->members.begin(); it != env->members.end(); ++it) {
                 std::string k = it->first;
                 std::any v = it->second;
 
@@ -195,6 +196,10 @@ namespace Serialization {
                 }
                 if (v.type() == typeid(int)) {
                     ret += IConstructionPolicy<VarTypeInt>::construct(k, v).second;
+                }
+
+                if (v.type() == typeid(std::vector<std::any>)) {
+                    ret += IConstructionPolicy<VarTypeArray>::construct(k, v).second;
                 }
 
                 if (v.type() == typeid(CircCFGInterp::Environment*)) {
@@ -309,15 +314,17 @@ namespace Serialization {
         void Serialize() {
             CircCFGInterp::Environment* env = this->interp->glob;
             std::ofstream ofs(cfg_path, std::ios::trunc | std::ios::out);
+            std::string s = "";
             while (env) {
                 for (auto it = env->members.rbegin(); it != env->members.rend(); it++) {
                     var_info_t var_info = construct_variable(it->first, it->second);
+                    s += var_info.second;
                     ofs.write(var_info.second.c_str(), var_info.first);
                 }
                 env = env->outer;
 
             }
-
+            std::cout << s << std::endl;
             ofs.close();
         };
 

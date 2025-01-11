@@ -136,6 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Circ\include\CFGINTERP\archive.hpp" />
+    <ClInclude Include="Circ\include\CFGINTERP\circfmt.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\env.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\error_log.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\expressions.hpp" />

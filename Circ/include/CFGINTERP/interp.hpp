@@ -10,6 +10,7 @@
 * 
 * 
 **/
+namespace Serialization {
 
 namespace CircCFGInterp {
 	
@@ -94,7 +95,8 @@ namespace CircCFGInterp {
 		bool known_type(std::any v) const {
 			if (v.type() == typeid(double) 
 				|| v.type() == typeid(std::string) 
-				|| v.type() == typeid(std::vector<std::any>)) {
+				|| v.type() == typeid(std::vector<std::any>)
+				|| v.type() == typeid(int)) {
 				return true;
 			}
 
@@ -265,6 +267,7 @@ namespace CircCFGInterp {
 	};
 
 	
+}
 
 	
 };

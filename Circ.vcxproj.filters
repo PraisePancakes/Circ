@@ -50,5 +50,8 @@
     <ClInclude Include="Circ\include\CFGINTERP\archive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\circfmt.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

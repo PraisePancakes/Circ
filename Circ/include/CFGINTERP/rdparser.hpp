@@ -5,6 +5,8 @@
 #include "expressions.hpp"
 #include "error_log.hpp"
 #include "statements.hpp"
+namespace Serialization {
+
 
 namespace CircCFGInterp {
 	
@@ -263,4 +265,5 @@ namespace CircCFGInterp {
 		~Parser() {};
 	};
 
+}
 }

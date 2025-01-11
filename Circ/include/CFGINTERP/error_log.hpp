@@ -3,6 +3,7 @@
 #include <vector>
 #include "lexer.hpp"
 #define MAX_POOL 15
+namespace Serialization {
 
 namespace CircCFGInterp {
 
@@ -65,4 +66,4 @@ namespace CircCFGInterp {
 
 
 }
-
+}

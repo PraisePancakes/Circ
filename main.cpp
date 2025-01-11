@@ -11,7 +11,7 @@ void CustomLog(int msgType, const char* text, va_list args)
     return;
 }
 /*
-    TO DO ARCHIVE (SERIALIZATION AND DESERIALIZATION)
+    TO DO ARCHIVE FORMATTER
 */
 
 int main() {
@@ -19,10 +19,9 @@ int main() {
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
  
-    cfgl.CFGAttrSet(key_path, 7);
+    cfgl.CFGAttrSet(key_path, std::string("jest"));
 
-    int x = cfgl.CFGAttr<int>(key_path);
-    std::cout << x;
+   
     
     //SERIALIZATION check cfg file before and after setting
     cfgl.Serialize();
