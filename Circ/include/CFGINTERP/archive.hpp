@@ -159,7 +159,7 @@ namespace Serialization {
                 + construction_lookup[CT::LCURL];
                 
 
-            for (auto it = env->members.begin(); it != env->members.end(); ++it) {
+            for (auto it = env->members.rbegin(); it != env->members.rend(); ++it) {
                 std::string k = it->first;
                 std::any v = it->second;
 
@@ -301,7 +301,7 @@ namespace Serialization {
             }
             CircFormat::FormatTypeFunctor formatter;
             Lexer l;
-            
+            std::cout << initial_layout_state << std::endl;
             std::string out = formatter(l.lex_contents(initial_layout_state));
             ofs.write(out.c_str(), out.size());
             ofs.close();

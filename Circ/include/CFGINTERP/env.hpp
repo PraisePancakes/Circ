@@ -26,7 +26,6 @@ namespace Serialization {
 				throw std::runtime_error("Variable not found: " + name);
 			}
 			void insert(const std::string& k, const std::any& v) {
-				std::cout << k << std::endl;
 				if (members.find(k) == members.end()) {
 					members.insert(std::pair<std::string, const std::any&>(k, v));
 				}

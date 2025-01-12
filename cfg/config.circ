@@ -1,8 +1,5 @@
 $test : "t",
 $best : {
- $a : 5,
- $jest : {
-  $b : 3,
- },
  $rest : "jest",
+ $a : 5,
 },

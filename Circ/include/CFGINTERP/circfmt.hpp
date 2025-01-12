@@ -28,7 +28,7 @@ namespace Serialization {
 			}
 
 			std::string fmt_array() {
-				
+				return "";
 			}
 
 			std::string fmt_var() {
