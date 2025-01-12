@@ -6,7 +6,7 @@
 namespace Serialization {
 
 
-namespace CircCFGInterp {
+
 
 	struct Literal;
 	struct Binary;
@@ -121,4 +121,4 @@ namespace CircCFGInterp {
 		~Grouping() {};
 	};
 
-}}
+}

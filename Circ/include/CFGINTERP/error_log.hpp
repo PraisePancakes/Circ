@@ -5,7 +5,7 @@
 #define MAX_POOL 15
 namespace Serialization {
 
-namespace CircCFGInterp {
+
 
 	//convert to bitmask
 	enum LogType {
@@ -66,4 +66,4 @@ namespace CircCFGInterp {
 
 
 }
-}
+

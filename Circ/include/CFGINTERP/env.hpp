@@ -1,6 +1,6 @@
 #pragma once
 namespace Serialization {
-	namespace CircCFGInterp {
+
 		class Environment {
 		public:
 			std::map<std::string, std::any> members;
@@ -53,9 +53,5 @@ namespace Serialization {
 		};
 
 
-
-
-	}
-
-	typedef CircCFGInterp::Environment CircObject;
+	typedef Environment CircObject;
 }

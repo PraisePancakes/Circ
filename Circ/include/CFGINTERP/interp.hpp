@@ -12,7 +12,7 @@
 **/
 namespace Serialization {
 
-namespace CircCFGInterp {
+
 	
 
 	namespace Internal {
@@ -269,5 +269,3 @@ namespace CircCFGInterp {
 	
 }
 
-	
-};

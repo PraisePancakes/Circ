@@ -8,7 +8,7 @@
 namespace Serialization {
 
 
-namespace CircCFGInterp {
+
 	
 	class Parser {
 		typedef std::size_t TokenIndex;
@@ -265,5 +265,4 @@ namespace CircCFGInterp {
 		~Parser() {};
 	};
 
-}
 }

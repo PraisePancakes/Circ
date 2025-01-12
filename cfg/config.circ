@@ -1,1 +1,8 @@
-$test:"t",$best:{$rest:"jest",$x:[[0,1,2,3],[4,5,6]],},
+$test : "t",
+$best : {
+ $a : 5,
+ $jest : {
+  $b : 3,
+ },
+ $rest : "jest",
+},

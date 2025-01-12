@@ -12,7 +12,7 @@
 namespace Serialization {
 
 
-namespace CircCFGInterp {
+
 	struct Block;
 	struct Decl;
 	
@@ -40,5 +40,4 @@ namespace CircCFGInterp {
 	};
 
 	
-}
 }

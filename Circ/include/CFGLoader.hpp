@@ -20,7 +20,7 @@
 namespace Circ {
    
     class CFGLoader {
-        Serialization::CircCFGInterp::Interpreter* interp;
+        Serialization::Interpreter* interp;
         void authenticate_circ_extension(const std::string& cfg) {
             size_t i = cfg.length();
             
@@ -46,7 +46,7 @@ namespace Circ {
         CFGLoader(const std::string& cfg) : cfg_path(cfg) {
             try {
                 authenticate_circ_extension(cfg);
-                interp = new Serialization::CircCFGInterp::Interpreter(cfg);
+                interp = new Serialization::Interpreter(cfg);
                 arc = new Serialization::Archive(interp, cfg);
            
             }

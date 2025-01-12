@@ -151,7 +151,7 @@ namespace Serialization {
     struct VarTypeObject {
     public:
         [[nodiscard]] static std::string construct_serializable(std::string key, std::any value) noexcept {
-            CircCFGInterp::Environment* env = std::any_cast<CircCFGInterp::Environment*>(value);
+           Environment* env = std::any_cast<Environment*>(value);
             std::string ret =
                 construction_lookup[CT::DOLLA]
                 + key
@@ -177,7 +177,7 @@ namespace Serialization {
                     ret += IConstructionPolicy<VarTypeArray>::construct(k, v).second;
                 }
 
-                if (v.type() == typeid(CircCFGInterp::Environment*)) {
+                if (v.type() == typeid(Environment*)) {
                     ret += construct_serializable(k, v);
                 }
             };
@@ -204,7 +204,7 @@ namespace Serialization {
         else if (value.type() == typeid(std::string)) {
             return IConstructionPolicy<VarTypeString>::construct(key, value);
         }
-        else if (value.type() == typeid(CircCFGInterp::Environment*)) {
+        else if (value.type() == typeid(Environment*)) {
             //object
 
             return IConstructionPolicy<VarTypeObject>::construct(key, value);
@@ -223,12 +223,12 @@ namespace Serialization {
 
 
 	class Archive {
-        CircCFGInterp::Interpreter* interp;
+        Interpreter* interp;
         std::string cfg_path;
     public:
-        Archive(CircCFGInterp::Interpreter* interp, const std::string& cfg) : interp(interp), cfg_path(cfg) {};
+        Archive(Interpreter* interp, const std::string& cfg) : interp(interp), cfg_path(cfg) {};
         void Set(std::initializer_list<std::string> kp, const std::any& v) {
-            CircCFGInterp::Environment* current = interp->env;
+            Environment* current = interp->env;
             std::any value;
             const std::string last_key = kp.begin()[kp.size() - 1];
             for (size_t i = 0; i < kp.size() - 1; i++) {
@@ -237,8 +237,8 @@ namespace Serialization {
                     throw std::runtime_error("Invalid key path: " + curr_key);
                 }
                 value = current->resolve(curr_key);
-                if (value.type() == typeid(CircCFGInterp::Environment*)) {
-                    current = std::any_cast<CircCFGInterp::Environment*>(value);
+                if (value.type() == typeid(Environment*)) {
+                    current = std::any_cast<Environment*>(value);
                 }
 
             }
@@ -254,7 +254,7 @@ namespace Serialization {
         template<typename Ty>
         Ty Get(std::initializer_list<std::string> kp) {
             try {
-                CircCFGInterp::Environment* current = interp->env;
+                Environment* current = interp->env;
                 std::any value;
 
                 for (const auto& key : kp) {
@@ -264,9 +264,9 @@ namespace Serialization {
                     }
                     value = current->resolve(key);
 
-                    if (value.type() == typeid(CircCFGInterp::Environment*)) {
+                    if (value.type() == typeid(Environment*)) {
 
-                        current = std::any_cast<CircCFGInterp::Environment*>(value);
+                        current = std::any_cast<Environment*>(value);
                     }
                     else {
                         current = nullptr;
@@ -288,7 +288,7 @@ namespace Serialization {
 
         void Serialize() {
             
-            CircCFGInterp::Environment* env = this->interp->glob;
+            Environment* env = this->interp->glob;
             std::ofstream ofs(cfg_path, std::ios::trunc | std::ios::out);
             std::string initial_layout_state = "";
             while (env) {
@@ -300,7 +300,7 @@ namespace Serialization {
 
             }
             CircFormat::FormatTypeFunctor formatter;
-            CircCFGInterp::Lexer l;
+            Lexer l;
             
             std::string out = formatter(l.lex_contents(initial_layout_state));
             ofs.write(out.c_str(), out.size());
