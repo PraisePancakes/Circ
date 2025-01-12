@@ -3,33 +3,10 @@
 #include <vector>
 #include "interp.hpp"
 #include "env.hpp"
+#include "circfmt.hpp"
+#include "circtypes.hpp"
 
 namespace Serialization {
-    enum CT {
-        DOLLA,
-        COL,
-        COMMA,
-        NEW_LINE,
-        QUOTE,
-        LCURL,
-        RCURL,
-        LBRAC,
-        RBRAC
-    };
-
-    const inline static std::vector<char> construction_lookup = {
-        '$',
-        ':',
-        ',',
-        '\n',
-        '\"',
-        '{',
-        '}',
-        '[',
-        ']'
-    };
-    typedef std::pair<int, std::string> var_info_t;
-
     template<typename VarType>
     struct IConstructionPolicy {
         typedef VarType type;
@@ -52,7 +29,6 @@ namespace Serialization {
                 if (v.type() == typeid(double)) {
                     double e = std::any_cast<double>(v);
                     ret += std::to_string(e);
-
                 }
                 else if (v.type() == typeid(std::string)) {
                     std::string e = std::any_cast<std::string>(v);
@@ -61,7 +37,6 @@ namespace Serialization {
                     ret += construction_lookup[CT::QUOTE];
                 }
                 else if (v.type() == typeid(std::vector<std::any>)) {
-                    ret += construction_lookup[CT::NEW_LINE];
                     ret += construct_array(v);
 
                 } if (v.type() == typeid(int)) {
@@ -89,7 +64,7 @@ namespace Serialization {
 
             ret += construct_array(value);
             ret += construction_lookup[CT::COMMA];
-            ret += construction_lookup[CT::NEW_LINE];
+           
 
             return ret;
         };
@@ -111,7 +86,7 @@ namespace Serialization {
                 + construction_lookup[CT::COL]
                 + str_lit
                 + construction_lookup[CT::COMMA]
-                + construction_lookup[CT::NEW_LINE]);
+                );
         };
         [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
             double v = std::any_cast<double>(value);
@@ -133,7 +108,7 @@ namespace Serialization {
                 + construction_lookup[CT::COL]
                 + str_lit
                 + construction_lookup[CT::COMMA]
-                + construction_lookup[CT::NEW_LINE]);
+                );
         };
         [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
             int v = std::any_cast<int>(value);
@@ -158,7 +133,7 @@ namespace Serialization {
                 + str_lit
                 + construction_lookup[CT::QUOTE]
                 + construction_lookup[CT::COMMA]
-                + construction_lookup[CT::NEW_LINE]);
+                );
         };
 
         [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
@@ -181,8 +156,8 @@ namespace Serialization {
                 construction_lookup[CT::DOLLA]
                 + key
                 + construction_lookup[CT::COL]
-                + construction_lookup[CT::LCURL]
-                + construction_lookup[CT::NEW_LINE];
+                + construction_lookup[CT::LCURL];
+                
 
             for (auto it = env->members.begin(); it != env->members.end(); ++it) {
                 std::string k = it->first;
@@ -208,7 +183,7 @@ namespace Serialization {
             };
             ret += construction_lookup[CT::RCURL];
             ret += construction_lookup[CT::COMMA];
-            ret += construction_lookup[CT::NEW_LINE];
+            
 
             return ret;
         };
@@ -312,19 +287,23 @@ namespace Serialization {
         }
 
         void Serialize() {
+            
             CircCFGInterp::Environment* env = this->interp->glob;
             std::ofstream ofs(cfg_path, std::ios::trunc | std::ios::out);
-            std::string s = "";
+            std::string initial_layout_state = "";
             while (env) {
                 for (auto it = env->members.rbegin(); it != env->members.rend(); it++) {
                     var_info_t var_info = construct_variable(it->first, it->second);
-                    s += var_info.second;
-                    ofs.write(var_info.second.c_str(), var_info.first);
+                    initial_layout_state += var_info.second;
                 }
                 env = env->outer;
 
             }
-            std::cout << s << std::endl;
+            CircFormat::FormatTypeFunctor formatter;
+            CircCFGInterp::Lexer l;
+            
+            std::string out = formatter(l.lex_contents(initial_layout_state));
+            ofs.write(out.c_str(), out.size());
             ofs.close();
         };
 

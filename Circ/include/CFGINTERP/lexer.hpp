@@ -300,6 +300,16 @@ namespace Serialization {
 				stream.close();
 
 			};
+
+			Lexer() = default;
+
+			[[nodiscard]] std::vector<Token> lex_contents(const std::string& str) {
+				contents = str;
+				lex();
+				return tokens;
+			}
+
+			 
 			~Lexer() {};
 		};
 	};
