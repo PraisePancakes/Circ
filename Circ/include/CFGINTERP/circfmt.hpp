@@ -5,10 +5,10 @@
 
 namespace Serialization {
 	namespace CircFormat {
-		
+
 		// formatter assumes correct syntax in input serialized string
 		class CircFormatFunctor {
-			
+
 			std::string get_space_fmt() const {
 				std::string spaces = "";
 				for (size_t i = 0; i < depth; i++) {
@@ -56,7 +56,7 @@ namespace Serialization {
 					ret += fmt_array();
 					break;
 				}
-				
+
 				ret += advance().word;
 				ret += '\n';
 
@@ -68,7 +68,7 @@ namespace Serialization {
 				while (!is_end()) {
 					fmt += fmt_var();
 				}
-				
+
 				return fmt;
 			}
 
@@ -76,7 +76,7 @@ namespace Serialization {
 				return cursor >= toks.size() - 1;
 			}
 
-			 Token peek_next()  const noexcept {
+			Token peek_next()  const noexcept {
 				if (is_end()) {
 					return toks[cursor];
 				}
@@ -120,7 +120,7 @@ namespace Serialization {
 		template<typename FunctType = CircFormatFunctor>
 		class FormatTypeFunctor {
 		public:
-			 inline std::string operator()(const TokenVector& ref_to_fmt) {
+			inline std::string operator()(const TokenVector& ref_to_fmt) {
 				FunctType t;
 				return t(ref_to_fmt);
 			};

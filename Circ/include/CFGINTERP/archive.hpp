@@ -64,7 +64,7 @@ namespace Serialization {
 
             ret += construct_array(value);
             ret += construction_lookup[CT::COMMA];
-           
+
 
             return ret;
         };
@@ -121,7 +121,7 @@ namespace Serialization {
         };
     };
 
-    
+
     struct VarTypeString
     {
     public:
@@ -146,18 +146,18 @@ namespace Serialization {
         };
     };
 
-        
+
 
     struct VarTypeObject {
     public:
         [[nodiscard]] static std::string construct_serializable(std::string key, std::any value) noexcept {
-           Environment* env = std::any_cast<Environment*>(value);
+            Environment* env = std::any_cast<Environment*>(value);
             std::string ret =
                 construction_lookup[CT::DOLLA]
                 + key
                 + construction_lookup[CT::COL]
                 + construction_lookup[CT::LCURL];
-                
+
 
             for (auto it = env->members.rbegin(); it != env->members.rend(); ++it) {
                 std::string k = it->first;
@@ -183,7 +183,7 @@ namespace Serialization {
             };
             ret += construction_lookup[CT::RCURL];
             ret += construction_lookup[CT::COMMA];
-            
+
 
             return ret;
         };
@@ -222,7 +222,7 @@ namespace Serialization {
 
 
 
-	class Archive {
+    class Archive {
         Interpreter* interp;
         std::string cfg_path;
     public:
@@ -243,7 +243,7 @@ namespace Serialization {
 
             }
             current->assign(last_key, v);
-            
+
         };
 
         template<typename Ty>
@@ -286,8 +286,10 @@ namespace Serialization {
             }
         }
 
+        
+
         void Serialize() {
-            
+
             Environment* env = this->interp->glob;
             std::ofstream ofs(cfg_path, std::ios::trunc | std::ios::out);
             std::string initial_layout_state = "";
@@ -308,5 +310,5 @@ namespace Serialization {
         };
 
 
-	};
+    };
 };

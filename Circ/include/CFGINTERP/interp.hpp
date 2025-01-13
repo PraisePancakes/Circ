@@ -127,14 +127,6 @@ namespace Serialization {
 			return arr;
 		}
 
-
-		std::any visitAssignment(Assignment* a)const override {
-			std::any r = evaluate(a->v);
-			env->assign(a->k, r);
-			return r;
-		}
-
-
 		std::any visitBinary(Binary* b) const override {
 			std::any l = evaluate(b->l);
 			std::any r = evaluate(b->r);
@@ -200,33 +192,22 @@ namespace Serialization {
 			std::map<std::string, std::any> members;
 			for (const auto& [key, value] : o->members) {
 				std::any v = evaluate(value);
-				members.insert({ key, v });
+				std::pair<std::string, std::any> kvp(key, v);
+				members.insert(kvp);
 			}
 			Environment* new_env = new Environment(members, env);
+			
 			return new_env;
 		}
-
-		
-
-		std::any visitVariable(Variable* v) const override {
-			return env->resolve(v->name);
-		}
-
 		
 		std::any visitDecl(Decl* d) override {
 			std::any val = nullptr;
-			
 			if (d->value) {
 				val = evaluate(d->value);
-				if (val.type() == typeid(Environment*)) {
-					Environment* new_env = std::any_cast<Environment*>(val);
-					new_env->outer = env;
-					env->insert(d->key, val);
-					env = new_env;
-					return nullptr;
-				}
+				std::pair<std::string, std::any> kvp(d->key, val);
+				env->insert(kvp.first, kvp.second);
 			}
-			env->insert(d->key, val);
+			
 			return nullptr;
 		}
 

@@ -18,7 +18,7 @@
 
 
 namespace Circ {
-   
+    using namespace Serialization;
     class CFGLoader {
         Serialization::Interpreter* interp;
         void authenticate_circ_extension(const std::string& cfg) {
@@ -40,6 +40,18 @@ namespace Circ {
 
         };
 
+        void print_env(Environment* curr) {
+            std::cout << "[ Environment ]" << std::endl;
+            for (auto& kvp : curr->members) {
+                std::cout << kvp.first << " , ";
+                if (kvp.second.type() == typeid(Environment*)) {
+                    print_env(std::any_cast<Environment*>(kvp.second));
+                    std::cout << "[ END ]" << std::endl;
+                }
+            }
+            std::cout << std::endl;
+        }
+
     public:
         Serialization::Archive* arc;
         std::string cfg_path;
@@ -48,6 +60,8 @@ namespace Circ {
                 authenticate_circ_extension(cfg);
                 interp = new Serialization::Interpreter(cfg);
                 arc = new Serialization::Archive(interp, cfg);
+                print_env(interp->glob);
+                
            
             }
             catch(std::exception& e) {
