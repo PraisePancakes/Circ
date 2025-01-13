@@ -1,4 +1,4 @@
-# CIRC : A raylib-compatible configuration framework.
+# CIRC : A raylib-compatible serialization framework.
 **v0.0.1-alpha**
 ## Why?
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Programming advanced graphical applications can be very messy. Let's clean that up a little. With Circ, you can keep all your environment variables (objects, int, string, etc..) in a separate file and just look up these constants using the Circ config loader API!
