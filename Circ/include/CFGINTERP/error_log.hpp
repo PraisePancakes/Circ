@@ -55,7 +55,7 @@ namespace Serialization {
 			std::string where = std::to_string(t.where);
 			std::string word = t.word;
 			
-			std::string message = "__CIRCFG RUNTIME EXCEPTION__ :\n\t type [ " + type + " ]\n\t line : " + line + " , " + where + " " + word + desc;
+			std::string message = "__CIRCFG RUNTIME EXCEPTION__ :\n\t type [ " + type + " ]\n\t line : " + line + " , " + where + " at token '" + word + "' " + desc;
 
 			
 			log_pool[cursor++] = message;

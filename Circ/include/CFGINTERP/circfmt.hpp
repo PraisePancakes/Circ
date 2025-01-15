@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "circtypes.hpp"
+#include "common.hpp"
 #include "lexer.hpp"
 
 namespace Serialization {

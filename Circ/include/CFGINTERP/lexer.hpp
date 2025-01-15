@@ -4,7 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include "circtypes.hpp"
+#include "common.hpp"
 
 
 namespace Serialization {
@@ -15,7 +15,7 @@ namespace Serialization {
 			std::string contents;
 			int start = 0;
 			int end = 0;
-			int line = 0;
+			int line = 1;
 			int pos = 0;
 			friend class Interpreter;
 
