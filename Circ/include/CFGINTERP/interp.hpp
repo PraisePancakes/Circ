@@ -225,16 +225,9 @@ namespace Serialization {
 			Lexer l(cfg_path);
 			Parser p(l.tokens);
 			stree = p.statements;
-			try {
-				for (auto& s : stree) {
-					execute(s);
-				}
-				
+			for (auto& s : stree) {
+				execute(s);
 			}
-			catch (std::exception& e) {
-				std::cerr << e.what() << std::endl;
-			}
-
 		};
 
 		

@@ -55,21 +55,16 @@ namespace Circ {
     public:
         Serialization::Archive* arc;
         std::string cfg_path;
-        CFGLoader(const std::string& cfg) : cfg_path(cfg) {
+        CFGLoader(const std::string& cfg) : cfg_path(cfg), arc(nullptr) {
             try {
-                authenticate_circ_extension(cfg);
-                interp = new Serialization::Interpreter(cfg);
-                arc = new Serialization::Archive(interp, cfg);
+                authenticate_circ_extension(cfg_path);
+                interp = new Serialization::Interpreter(cfg_path);
+                arc = new Serialization::Archive(interp, cfg_path);
                 print_env(interp->glob);
-                
-           
             }
-            catch(std::exception& e) {
-                std::cerr << e.what() << std::endl;
-                throw;
+            catch (std::exception& e) {
+                exit(EXIT_FAILURE);
             }
-           
-           
         };
 
         void Serialize() {
@@ -78,7 +73,7 @@ namespace Circ {
             }
             catch (std::exception& e) {
                 std::cerr << e.what() << std::endl;
-                throw;
+               
             }
             
         };

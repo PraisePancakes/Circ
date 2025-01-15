@@ -81,23 +81,31 @@ namespace Serialization {
 
         void Serialize() {
 
-            Environment* env = this->interp->glob;
-            std::ofstream ofs(cfg_path, std::ios::trunc | std::ios::out);
-            std::string initial_layout_state = "";
-            while (env) {
-                for (auto it = env->members.rbegin(); it != env->members.rend(); it++) {
-                    var_info_t var_info = construct_variable(it->first, it->second);
-                    initial_layout_state += var_info.second;
-                }
-                env = env->outer;
 
-            }
-            CircFormat::FormatTypeFunctor formatter;
-            Lexer l;
-            std::cout << initial_layout_state << std::endl;
-            std::string out = formatter(l.lex_contents(initial_layout_state));
-            ofs.write(out.c_str(), out.size());
-            ofs.close();
+           Environment* glob = this->interp->glob;
+           std::ofstream ofs(cfg_path, std::ios::trunc | std::ios::out);
+           ofs.exceptions(std::ofstream::badbit | std::ofstream::failbit);
+
+           std::string initial_layout_state = "";
+           for (auto it = glob->members.rbegin(); it != glob->members.rend(); it++) {
+               var_info_t var_info = construct_variable(it->first, it->second);
+               initial_layout_state += var_info.second;
+           }
+           try {
+               CircFormat::FormatTypeFunctor formatter;
+               Lexer l;
+
+               std::string out = formatter(l.lex_contents(initial_layout_state));
+               ofs.write(out.c_str(), out.size());
+               ofs.close();
+           }
+           catch (std::ofstream::failure& e) {
+               std::cout << e.what() << std::endl;
+           }
+           catch (std::exception& e) {
+               std::cout << e.what() << std::endl;
+           }
+            
         };
 
 

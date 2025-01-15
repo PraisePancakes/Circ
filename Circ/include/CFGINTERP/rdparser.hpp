@@ -152,9 +152,7 @@ namespace Serialization {
 		void sync() {
 			had_error = true;
 			advance();
-
 			while (!is_end()) {
-				
 				if (parser_peek().t == TOK_DOLLA) return;
 				advance();
 			}
@@ -167,6 +165,9 @@ namespace Serialization {
 			std::map<std::string, BaseExpression*> members;
 			while (parser_peek().t != TOK_RCURL && !is_end()) {
 				Decl* d = (Decl*)decl();
+				if (d == nullptr) {
+					continue;
+				}
 				std::pair<std::string, BaseExpression*> kvp(d->key, d->value);
 				members.insert(kvp);
 			}
@@ -199,7 +200,7 @@ namespace Serialization {
 			}
 			catch (std::exception& e) {
 				sync();
-				return nullptr;
+				
 			}
 		
 		}
@@ -208,15 +209,14 @@ namespace Serialization {
 		bool had_error = false;
 		std::vector<BaseStatement*> statements;
 		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
-			
 			while (!is_end()) {
 				statements.push_back(decl());
 			}
-
 			if (had_error) {
 				//guard such that file may not be serialized if not parsed correctly.
 				ParseErrorLogger::instance().print_list();
-				std::cout << "here";
+				throw std::runtime_error("");
+				
 			}
 		};
 		~Parser() {};
