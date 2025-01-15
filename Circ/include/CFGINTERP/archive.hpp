@@ -13,6 +13,11 @@ namespace Serialization {
         std::string cfg_path;
     public:
         Archive(Interpreter* interp, const std::string& cfg) : interp(interp), cfg_path(cfg) {};
+
+        /*
+            @exception :
+                throw if key path is invalid, return from function after caught, that way assignment is discarded.
+        */
         void Set(std::initializer_list<std::string> kp, const std::any& v) {
             Environment* current = interp->env;
             std::any value;
@@ -24,6 +29,9 @@ namespace Serialization {
                     return;
                 }
                 value = current->resolve(curr_key);
+                /*
+                    this should never throw
+                */
                 if (value.type() == typeid(Environment*)) {
                     current = std::any_cast<Environment*>(value);
                 }
@@ -31,6 +39,10 @@ namespace Serialization {
             current->assign(last_key, v);
         };
 
+        /*
+            @exception :
+                if thrown from here, program should exit, otherwise client will use default constructed type
+        */
         template<typename Ty>
         Ty Get(std::initializer_list<std::string> kp) {
                 Environment* current = interp->env;
@@ -67,8 +79,8 @@ namespace Serialization {
                initial_layout_state += var_info.second;
            }
            CircFormat::FormatTypeFunctor formatter;
-           TokenVector contents = l.lex_contents(initial_layout_state);
-           std::string out = formatter(l.lex_contents(initial_layout_state));
+           TokenVector content = l.lex_contents(initial_layout_state);
+           std::string out = formatter(content);
            ofs.write(out.c_str(), out.size());
            ofs.close();
         };
