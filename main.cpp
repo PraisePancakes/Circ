@@ -19,6 +19,7 @@ int main() {
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
     cfgl.Serialize();
+   
     
  
     return 0;

@@ -28,6 +28,11 @@ namespace Serialization {
 			return tokens[curr].t == t;
 		}
 
+		static void report(LogType t, Token tok, const std::string& s) {
+			ParseErrorLogger::instance().log(t, tok, s);
+			throw std::runtime_error("err");
+		}
+
 		Token advance() {
 			if (!is_end()) curr++;
 			return parser_previous();
@@ -62,13 +67,13 @@ namespace Serialization {
 				if (match({ TOK_RPAREN })) {
 					return new Grouping(expr);
 				}
-				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing closing ')'");
+				report(LogType::SYNTAX, parser_peek(), "Missing closing ')'");
 				
 			}
 			if (match({ TOK_LBRAC })) {
 				BaseExpression* arr = array();
 				if (!match({ TOK_RBRAC })) {
-					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ']'");
+					report(LogType::SYNTAX, parser_peek(), "Missing ']'");
 					throw std::runtime_error("");
 				}
 				Array* a = (Array*)arr;
@@ -80,7 +85,7 @@ namespace Serialization {
 				if (match({ TOK_RCURL })) {
 					return object;
 				}
-				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing closing '}'");
+				report(LogType::SYNTAX, parser_peek(), "Missing closing '}'");
 			}
 
 		};
@@ -100,7 +105,7 @@ namespace Serialization {
 				BaseExpression* e = term();
 				if (parser_peek().t != TOK_RBRAC) {
 					if (!match({ TOK_COMMA })) {
-						ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing , in array");
+						report(LogType::SYNTAX, parser_peek(), "Missing , in array");
 					
 					}
 				}
@@ -108,7 +113,7 @@ namespace Serialization {
 				elems.push_back(e);
 			}
 			if (parser_peek().t == TOK_RBRAC && parser_previous().t == TOK_COMMA) {
-				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "trailing comma");
+				report(LogType::SYNTAX, parser_peek(), "trailing comma");
 				
 			}
 
@@ -148,6 +153,11 @@ namespace Serialization {
 			had_error = true;
 			advance();
 
+			while (!is_end()) {
+				
+				if (parser_peek().t == TOK_DOLLA) return;
+				advance();
+			}
 
 		};
 
@@ -168,45 +178,46 @@ namespace Serialization {
 		}
 
 		BaseStatement* decl() {
-			if (match({ TOK_DOLLA })) {
-				std::string key = parser_peek().word;
-				if (match({ TOK_VAR })) {
-					if (match({ TOK_COL })) {
-						BaseExpression* v = expression();
-						if (!check(TOK_EOF) && !check(TOK_RCURL) ) {
-								if (!match({ TOK_COMMA })) {
-								ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ',' ");
-								
-							}
-						}
-						return new Decl(key, v);
-						
-					}
-					ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing ':' initializer");
-				}
-				ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Invalid identifier");
-			}
-			ParseErrorLogger::instance().log(LogType::SYNTAX, parser_peek(), "Missing '$'");
-		}
-
-	public:
-		inline static bool had_error = false;
-		std::vector<BaseStatement*> statements;
-		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
 			try {
-				while (!is_end()) {
-					statements.push_back(decl());
+				if (match({ TOK_DOLLA })) {
+					std::string key = parser_peek().word;
+					if (match({ TOK_VAR })) {
+						if (match({ TOK_COL })) {
+							BaseExpression* v = expression();
+							if (!is_end() && !check(TOK_RCURL)) {
+								if (!match({ TOK_COMMA })) {
+									report(LogType::SYNTAX, parser_peek(), "Missing ',' ");
+								}
+							}
+							return new Decl(key, v);
+						}
+						report(LogType::SYNTAX, parser_peek(), "Missing ':' initializer");
+					}
+					report(LogType::SYNTAX, parser_peek(), "Invalid identifier");
 				}
+				report(LogType::SYNTAX, parser_peek(), "Missing '$'");
 			}
 			catch (std::exception& e) {
 				sync();
+				return nullptr;
 			}
-			if (had_error) {
-				had_error = false;
-				ParseErrorLogger::instance().print_list();
-				throw;
-			}
+		
+		}
+
+	public:
+		bool had_error = false;
+		std::vector<BaseStatement*> statements;
+		Parser(const std::vector<Token>& toks) : tokens(toks), curr() {
 			
+			while (!is_end()) {
+				statements.push_back(decl());
+			}
+
+			if (had_error) {
+				//guard such that file may not be serialized if not parsed correctly.
+				ParseErrorLogger::instance().print_list();
+				std::cout << "here";
+			}
 		};
 		~Parser() {};
 	};

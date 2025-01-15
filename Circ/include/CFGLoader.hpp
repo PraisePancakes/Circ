@@ -66,6 +66,7 @@ namespace Circ {
             }
             catch(std::exception& e) {
                 std::cerr << e.what() << std::endl;
+                throw;
             }
            
            
@@ -77,6 +78,7 @@ namespace Circ {
             }
             catch (std::exception& e) {
                 std::cerr << e.what() << std::endl;
+                throw;
             }
             
         };
@@ -93,6 +95,7 @@ namespace Circ {
                 }
                 std::cout << "NULL" << std::endl;
                 std::cout << "attempted to assign type : " << v.type().name() << " to key => " << kp.begin()[kp.size() - 1] << std::endl;
+                throw;
             }
            
             
