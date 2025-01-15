@@ -23,7 +23,6 @@ namespace Circ {
         Serialization::Interpreter* interp;
         void authenticate_circ_extension(const std::string& cfg) {
             size_t i = cfg.length();
-            
             std::string ext = "";
             while (cfg[i] != '.') {
                 --i;
@@ -40,18 +39,17 @@ namespace Circ {
 
         };
 
-        void print_env(Environment* curr) {
+        void print_env_ast(Environment* curr) {
             std::cout << "[ Environment ]" << std::endl;
             for (auto& kvp : curr->members) {
                 std::cout << kvp.first << " , ";
                 if (kvp.second.type() == typeid(Environment*)) {
-                    print_env(std::any_cast<Environment*>(kvp.second));
+                    print_env_ast(std::any_cast<Environment*>(kvp.second));
                     std::cout << "[ END ]" << std::endl;
                 }
             }
             std::cout << std::endl;
         }
-
     public:
         Serialization::Archive* arc;
         std::string cfg_path;
@@ -60,9 +58,14 @@ namespace Circ {
                 authenticate_circ_extension(cfg_path);
                 interp = new Serialization::Interpreter(cfg_path);
                 arc = new Serialization::Archive(interp, cfg_path);
-                print_env(interp->glob);
+                print_env_ast(interp->glob);
             }
             catch (std::exception& e) {
+                std::cerr << e.what() << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            catch (std::ofstream::failure& e) {
+                std::cerr << e.what() << std::endl;
                 exit(EXIT_FAILURE);
             }
         };
@@ -73,9 +76,10 @@ namespace Circ {
             }
             catch (std::exception& e) {
                 std::cerr << e.what() << std::endl;
-               
             }
-            
+            catch (std::ofstream::failure& e) {
+                std::cerr << e.what() << std::endl;
+            }
         };
         
         void CFGAttrSet(std::initializer_list<std::string> kp, const std::any& v) {
@@ -84,30 +88,32 @@ namespace Circ {
             }
             catch (std::exception& e) {
                 std::cerr << e.what() << std::endl;
-                std::cerr << "Failed to assign at : " << std::endl;
+                std::cerr << "[ WARN ] Failed to assign at : " << std::endl;
                 for (auto s : kp) {
-                    std::cout << s << " => ";
+                    std::cerr << s << " => ";
                 }
-                std::cout << "NULL" << std::endl;
-                std::cout << "attempted to assign type : " << v.type().name() << " to key => " << kp.begin()[kp.size() - 1] << std::endl;
-                throw;
+                std::cerr << "NULL" << std::endl;
+                std::cerr << "attempted to assign type : " << v.type().name() << " to key => " << kp.begin()[kp.size() - 1] << std::endl;
+                std::cerr << "assignment attempt has been discarded" << std::endl;
             }
-           
-            
         };
-
-        template<typename WrapperType>
-        WrapperType CFGAttr(std::string k) {
-            return arc->Get<WrapperType>(k);
-        };
-
 
         template<typename WrapperType>
         WrapperType CFGAttr(std::initializer_list<std::string> key_path) {
-            return arc->Get<WrapperType>(key_path);
+            WrapperType ret;
+            try {
+                ret = arc->Get<WrapperType>(key_path);
+                return ret;
+            }
+            catch (std::exception& e) {
+                std::cout << e.what() << std::endl;
+            }
+            catch (std::bad_any_cast& e) {
+                std::cout << e.what() << std::endl;
+            }
+           
         }
 
-       
         ~CFGLoader() {
           
         };
