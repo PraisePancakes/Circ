@@ -159,7 +159,7 @@ namespace Serialization {
                 + construction_lookup[CT::LCURL];
 
 
-            for (auto it = env->members.rbegin(); it != env->members.rend(); ++it) {
+            for (auto it = env->members.begin(); it != env->members.end(); ++it) {
                 std::string k = it->first;
                 std::any v = it->second;
 
