@@ -28,7 +28,27 @@ namespace Serialization {
 			}
 
 			std::string fmt_array() noexcept  {
-				return "";
+				std::string ret = advance().word;
+
+				while (peek().t != TOK_RBRAC) {
+					switch (peek().t) {
+					case TOK_COMMA:
+						ret += advance().word;
+						ret += ' ';
+						break;
+					case TOK_NUM:
+					case TOK_STRING:
+						ret += advance().word;
+						break;
+					case TOK_LBRAC:
+						ret += '\n';
+						ret += fmt_array();
+					}
+				}
+
+				ret += advance().word;
+				
+				return ret;
 			}
 
 			std::string fmt_var() noexcept  {
