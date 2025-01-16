@@ -57,12 +57,34 @@ namespace Serialization {
 			
 		};
 
+		struct BInt {
+			using Type = int;
+
+			static Type evaluate(std::any l, TokenType op, std::any r) {
+				Type left = std::any_cast<Type>(l);
+				Type right = std::any_cast<Type>(r);
+				switch (op) {
+				case TOK_PLUS:
+					return left + right;
+				case TOK_MINUS:
+					return left - right;
+				case TOK_DIV:
+					return left / right;
+				case TOK_STAR:
+					return left * right;
+				case TOK_MOD:
+					return (int)left % (int)right;
+
+				};
+			};
+		};
+
 		struct BString {
 			using Type = std::string;
 			static Type evaluate(std::any l, TokenType op, std::any r) {
 				Type left = std::any_cast<Type>(l);
 				Type right = std::any_cast<Type>(r);
-
+				
 				switch (op) {
 				case TOK_PLUS:
 					return left + right;
@@ -80,8 +102,6 @@ namespace Serialization {
 	
 
 	class Interpreter : public ExpressionVisitor, public StatementVisitor {
-
-
 		bool is_truthy(std::any obj) const {
 			if (!obj.has_value()) {
 				return false;
@@ -141,6 +161,10 @@ namespace Serialization {
 				Internal::IBinaryPolicy<Internal::BString> s;
 				return Internal::IBinaryPolicy<Internal::BString>::evaluate_binary(l, op, r);
 
+			}
+
+			if (l.type() == typeid(int) && r.type() == typeid(int)) {
+				return Internal::IBinaryPolicy<Internal::BInt>::evaluate_binary(l, op, r);
 			}
 
 

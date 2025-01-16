@@ -29,10 +29,10 @@ namespace Serialization {
                     return;
                 }
                 value = current->resolve(curr_key);
-                /*
-                    this should never throw
-                */
                 if (value.type() == typeid(Environment*)) {
+                    /*
+                      this should never throw
+                    */
                     current = std::any_cast<Environment*>(value);
                 }
             }

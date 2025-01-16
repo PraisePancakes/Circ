@@ -17,10 +17,8 @@ namespace Serialization {
 
     struct VarTypeArray {
         [[nodiscard]] static std::string construct_array(std::any value) noexcept {
-
             std::string ret = "";
             ret += construction_lookup[CT::LBRAC];
-
             std::vector<std::any> arr = std::any_cast<std::vector<std::any>>(value);
             for (size_t i = 0; i < arr.size(); i++) {
                 std::any v = arr[i];
@@ -48,7 +46,6 @@ namespace Serialization {
                 }
 
             }
-
             ret += construction_lookup[CT::RBRAC];
             return ret;
         };
@@ -195,7 +192,7 @@ namespace Serialization {
         };
     };
 
-    [[nodiscard]] static var_info_t construct_variable(std::string key, std::any value) {
+    [[nodiscard]] static var_info_t construct_variable(std::string key, std::any value) noexcept {
         if (value.type() == typeid(double)) {
 
             return IConstructionPolicy<VarTypeDouble>::construct(key, value);

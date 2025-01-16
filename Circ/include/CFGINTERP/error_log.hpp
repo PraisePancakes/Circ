@@ -31,8 +31,6 @@ namespace Serialization {
 		ParseErrorLogger() : cursor(0) {};
 		~ParseErrorLogger() {};
 	
-		
-
 	public:
 		static ParseErrorLogger& instance() {
 			static ParseErrorLogger logger;
