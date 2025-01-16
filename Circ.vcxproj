@@ -147,6 +147,7 @@
     <ClInclude Include="Circ\include\CFGINTERP\statements.hpp" />
     <ClInclude Include="Circ\include\CFGINTERP\type_schema.hpp" />
     <ClInclude Include="Circ\include\CFGLoader.hpp" />
+    <ClInclude Include="Circ\include\debug.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

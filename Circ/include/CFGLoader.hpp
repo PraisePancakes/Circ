@@ -5,6 +5,7 @@
 #include "CFGINTERP/archive.hpp"
 #include "CFGINTERP/env.hpp"
 #include <sstream>
+#include "debug.hpp"
 
 /*
 * @why :
@@ -58,7 +59,11 @@ namespace Circ {
                 authenticate_circ_extension(cfg_path);
                 interp = new Serialization::Interpreter(cfg_path);
                 arc = new Serialization::Archive(interp, cfg_path);
-                print_env_ast(interp->glob);
+#if defined(__CIRC__DEBUG__) && __CIRC__DEBUG__
+                
+                    print_env_ast(interp->glob);
+#endif
+              
             }
             catch (std::exception& e) {
                 std::cerr << e.what() << std::endl;
