@@ -41,15 +41,15 @@ namespace Circ {
         };
 
         void print_env_ast(Environment* curr) {
-            std::cout << "[ Environment ]" << std::endl;
+            std::clog << "[ Environment ]" << std::endl;
             for (auto& kvp : curr->members) {
-                std::cout << kvp.first << " , ";
+                std::clog << kvp.first << " , ";
                 if (kvp.second.type() == typeid(Environment*)) {
                     print_env_ast(std::any_cast<Environment*>(kvp.second));
-                    std::cout << "[ END ]" << std::endl;
+                    std::clog << "[ END ]" << std::endl;
                 }
             }
-            std::cout << std::endl;
+            std::clog << std::endl;
         }
     public:
         Serialization::Archive* arc;
@@ -111,10 +111,10 @@ namespace Circ {
                 return ret;
             }
             catch (std::exception& e) {
-                std::cout << e.what() << std::endl;
+                std::cerr << e.what() << std::endl;
             }
             catch (std::bad_any_cast& e) {
-                std::cout << e.what() << std::endl;
+                std::cerr << e.what() << std::endl;
             }
            
         }

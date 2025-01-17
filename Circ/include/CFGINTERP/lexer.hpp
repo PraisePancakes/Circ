@@ -5,11 +5,9 @@
 #include <fstream>
 #include <string>
 #include "common.hpp"
-
+#include "../debug.hpp"
 
 namespace Serialization {
-	
-
 		class Lexer {
 			std::vector<Token> tokens;
 			std::string contents;
@@ -251,7 +249,9 @@ namespace Serialization {
 					std::cerr << "file failed to open" << std::endl;
 				}
 				else {
-					std::cerr << "cfg file opened" << std::endl;
+#if defined(__CIRC__DEBUG__) && __CIRC__DEBUG__
+					std::clog << "cfg file opened" << std::endl;
+#endif
 				}
 				std::string line;
 				while (std::getline(stream, line)) {
