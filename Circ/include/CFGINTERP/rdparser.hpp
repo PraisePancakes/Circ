@@ -85,7 +85,7 @@ namespace Serialization {
 				if (match({ TOK_RCURL })) {
 					return object;
 				}
-				report(LogType::SYNTAX, parser_peek(), "Missing closing '}'");
+				report(LogType::SYNTAX | LogType::WARNING, parser_peek(), "Missing closing '}'");
 			}
 
 		};
@@ -187,7 +187,7 @@ namespace Serialization {
 							BaseExpression* v = expression();
 							if (!is_end() && !check(TOK_RCURL)) {
 								if (!match({ TOK_COMMA })) {
-									report(LogType::SYNTAX, parser_peek(), "Missing ',' ");
+									report(LogType::VITAL | LogType::SYNTAX , parser_peek(), "Missing ',' ");
 								}
 							}
 							return new Decl(key, v);
