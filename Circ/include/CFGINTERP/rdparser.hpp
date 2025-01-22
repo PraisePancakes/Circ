@@ -88,6 +88,8 @@ namespace Serialization {
 				report(LogType::SYNTAX | LogType::WARNING, parser_peek(), "Missing closing '}'");
 			}
 
+			return nullptr;
+
 		};
 
 		BaseExpression* unary() {
@@ -199,10 +201,10 @@ namespace Serialization {
 				report(LogType::SYNTAX, parser_peek(), "Missing '$'");
 			}
 			catch (std::exception& e) {
+				std::cerr << e.what() << std::endl;
 				sync();
-				
 			}
-		
+			return nullptr;
 		}
 
 	public:

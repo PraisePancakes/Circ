@@ -65,26 +65,28 @@ namespace Circ {
 #endif
               
             }
-            catch (std::exception& e) {
-                std::cerr << e.what() << std::endl;
-                exit(EXIT_FAILURE);
-            }
             catch (std::ofstream::failure& e) {
                 std::cerr << e.what() << std::endl;
                 exit(EXIT_FAILURE);
             }
+            catch (std::exception& e) {
+                std::cerr << e.what() << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            
         };
 
         void Serialize() {
             try {
                 arc->Serialize();
             }
-            catch (std::exception& e) {
-                std::cerr << e.what() << std::endl;
-            }
             catch (std::ofstream::failure& e) {
                 std::cerr << e.what() << std::endl;
             }
+            catch (std::exception& e) {
+                std::cerr << e.what() << std::endl;
+            }
+          
         };
         
         void CFGAttrSet(std::initializer_list<std::string> kp, const std::any& v) {

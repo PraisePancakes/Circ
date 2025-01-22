@@ -65,7 +65,7 @@ namespace Serialization {
             return ret;
         };
         [[nodiscard]] static var_info_t construct(std::string key, std::any value) noexcept {
-            int byte_size = 0;
+            size_t byte_size = 0;
             std::string serializable = construct_serializable(key, value);
             byte_size += serializable.length();
 
@@ -87,7 +87,7 @@ namespace Serialization {
         [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
             double v = std::any_cast<double>(value);
             std::string str_lit = std::to_string(v);
-            int byte_size = 0;
+            size_t byte_size = 0;
             std::string serializable = construct_serializable(key, str_lit);
             byte_size += serializable.length();
             return { byte_size , serializable };
@@ -109,7 +109,7 @@ namespace Serialization {
         [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
             int v = std::any_cast<int>(value);
             std::string str_lit = std::to_string(v);
-            int byte_size = 0;
+            size_t byte_size = 0;
             std::string serializable = construct_serializable(key, str_lit);
             byte_size += serializable.length();
             return { byte_size , serializable };
@@ -134,7 +134,7 @@ namespace Serialization {
 
         [[nodiscard]] static var_info_t construct(std::string key, std::any value)  noexcept {
             std::string str_lit = std::any_cast<std::string>(value);
-            int byte_size = 0;
+            size_t byte_size = 0;
             std::string serializable = construct_serializable(key, str_lit);
             byte_size += serializable.length();
             return { byte_size  , serializable };
@@ -184,7 +184,7 @@ namespace Serialization {
             return ret;
         };
         [[nodiscard]] static var_info_t construct(std::string key, std::any value) noexcept {
-            int byte_size = 0;
+            size_t byte_size = 0;
             std::string serializable = construct_serializable(key, value);
             byte_size += serializable.length();
 
@@ -194,7 +194,6 @@ namespace Serialization {
 
     [[nodiscard]] static var_info_t construct_variable(std::string key, std::any value) noexcept {
         if (value.type() == typeid(double)) {
-
             return IConstructionPolicy<VarTypeDouble>::construct(key, value);
         }
         else if (value.type() == typeid(std::string)) {
@@ -214,6 +213,6 @@ namespace Serialization {
 
             return IConstructionPolicy<VarTypeInt>::construct(key, value);
         }
-
+        return {};
     }
 }

@@ -42,7 +42,7 @@ namespace Serialization {
 	};
 
     typedef std::vector<Token> TokenVector;
-    typedef std::pair<int, std::string> var_info_t;
+    typedef std::pair<size_t, std::string> var_info_t;
 
 	
 

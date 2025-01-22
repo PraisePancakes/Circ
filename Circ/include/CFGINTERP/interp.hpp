@@ -51,8 +51,8 @@ namespace Serialization {
 					return left * right;
 				case TOK_MOD:
 					return (int)left % (int)right;
-
 				};
+				throw std::runtime_error("Serialization::Internal::BDouble policy operate.");
 			};
 			
 		};
@@ -76,6 +76,7 @@ namespace Serialization {
 					return (int)left % (int)right;
 
 				};
+				throw std::runtime_error("Serialization::Internal::BInt policy failed to operate.");
 			};
 		};
 
@@ -89,7 +90,7 @@ namespace Serialization {
 				case TOK_PLUS:
 					return left + right;
 				default:
-					throw std::runtime_error("invalid binary operation.");
+					throw std::runtime_error("Serialization::Internal::BString policy failed to operate.");
 				};
 
 			};
@@ -153,14 +154,11 @@ namespace Serialization {
 			TokenType op = b->op;
 
 			if (l.type() == typeid(double) && r.type() == typeid(double)) {
-				
 				return Internal::IBinaryPolicy<Internal::BDouble>::evaluate_binary(l, op, r);
 			}
 
 			if (l.type() == typeid(std::string) && r.type() == typeid(std::string)) {
-				Internal::IBinaryPolicy<Internal::BString> s;
 				return Internal::IBinaryPolicy<Internal::BString>::evaluate_binary(l, op, r);
-
 			}
 
 			if (l.type() == typeid(int) && r.type() == typeid(int)) {
