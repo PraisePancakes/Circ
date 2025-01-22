@@ -23,8 +23,18 @@ namespace Serialization {
         * @pseudo
         *  E current env
         *   if key exists get key
-                if key is E, cast to E and set current to inner E
-
+                if key is E 
+                    cast to E and set current to inner E
+                    continue
+                else
+                    assign k, v to current env
+            else
+                if not on last key
+                    create a new environment
+                    insert new environment to current env
+                    set current env equal to new environment
+                else
+                    insert kvp into current environment
         *   
         * 
         */
