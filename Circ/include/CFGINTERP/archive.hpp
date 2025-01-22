@@ -11,24 +11,71 @@ namespace Serialization {
     class Archive {
         Interpreter* interp;
         std::string cfg_path;
+        typedef std::initializer_list<std::string> Path;
     public:
         Archive(Interpreter* interp, const std::string& cfg) : interp(interp), cfg_path(cfg) {};
+
+        /**
+        * @method
+        *   Create
+        * @what
+        *   We have some set of keys {"k1", "k2"} 
+        * @pseudo
+        *  E current env
+        *   if key exists get key
+                if key is E, cast to E and set current to inner E
+
+        *   
+        * 
+        */
+        void Create(Path kp, const std::any& v) {
+            Environment* current = interp->env;
+            //last_key is where we are creating
+            const std::string last_key = kp.begin()[kp.size() - 1]; 
+            for (size_t i = 0; i < kp.size(); i++) {
+                std::string curr_key = kp.begin()[i];
+                if (current->find(curr_key)) {
+                    std::any val = current->resolve(curr_key);
+                    if (val.type() == typeid(Environment*)) {
+                        Environment* env = std::any_cast<Environment*>(val);
+                        current = env;
+                        continue;
+                    }
+                   
+                    current->assign(curr_key, v);
+
+                }
+                else {
+                  
+                    if (i < kp.size() - 1) {
+                        Environment* new_env = new Environment();
+                        current->insert(curr_key, new_env);
+                        current = new_env;
+                    }
+                    else {
+                        current->insert(curr_key, v);
+                    }
+                }
+               
+            }
+        };
+
 
         /*
             @exception :
                 throw if key path is invalid, return from function after caught, that way assignment is discarded.
         */
-        void Set(std::initializer_list<std::string> kp, const std::any& v) {
+        void Set(Path kp, const std::any& v) {
             Environment* current = interp->env;
-            std::any value;
             const std::string last_key = kp.begin()[kp.size() - 1];
+
             for (size_t i = 0; i < kp.size() - 1; i++) {
                 std::string curr_key = kp.begin()[i];
                 if (!current) {
                     throw std::runtime_error("Invalid key path: " + curr_key);
                     return;
                 }
-                value = current->resolve(curr_key);
+                std::any value = current->resolve(curr_key);
                 if (value.type() == typeid(Environment*)) {
                     /*
                       this should never throw
@@ -44,7 +91,7 @@ namespace Serialization {
                 if thrown from here, program should exit, otherwise client will use default constructed type
         */
         template<typename Ty>
-        Ty Get(std::initializer_list<std::string> kp) {
+        Ty Get(Path kp) {
                 Environment* current = interp->env;
                 std::any value;
                 for (const auto& key : kp) {

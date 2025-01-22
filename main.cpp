@@ -18,7 +18,7 @@ int main() {
     std::initializer_list<std::string> key_path = {"a", "t"};
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
-    cfgl.CFGAttrSet(key_path, 1);
+    cfgl.CFGAttrCreate(key_path, 6);
     cfgl.Serialize();
    
    

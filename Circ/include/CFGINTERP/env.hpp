@@ -13,7 +13,9 @@ namespace Serialization {
 
 			}
 
-
+			bool find(const std::string& n) {
+				return (members.find(n) != members.end());
+			}
 
 			std::any resolve(const std::string& name) {
 				if (members.find(name) != members.end()) {
@@ -36,7 +38,7 @@ namespace Serialization {
 
 			void assign(const std::string& name, const std::any& value) {
 				if (members.find(name) != members.end()) {
-					auto prev = members[name];
+					const std::any const& prev = members[name];
 					if (prev.type() != value.type()) {
 						throw std::runtime_error("Mismatched value types");
 					}

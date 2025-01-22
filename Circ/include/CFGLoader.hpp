@@ -88,6 +88,15 @@ namespace Circ {
             }
           
         };
+
+        void CFGAttrCreate(std::initializer_list<std::string> kp, const std::any& v) {
+            try {
+                arc->Create(kp, v);
+            }
+            catch (std::exception& e) {
+                std::cerr << e.what() << std::endl;
+            }
+        };
         
         void CFGAttrSet(std::initializer_list<std::string> kp, const std::any& v) {
             try {
