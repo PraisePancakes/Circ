@@ -19,7 +19,8 @@ namespace Serialization {
         * @method
         *   Create
         * @what
-        *   We have some set of keys {"k1", "k2"} 
+        *   input : We have some set of keys {"k1", "k2"} and a value (V) 
+        *   output : recursively insert new environments until last key, then insert V
         * @pseudo
         *  E current env
         *   if key exists get key
