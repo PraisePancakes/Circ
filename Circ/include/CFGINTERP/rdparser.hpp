@@ -6,10 +6,6 @@
 #include "error_log.hpp"
 #include "statements.hpp"
 namespace Serialization {
-
-
-
-	
 	class Parser {
 		typedef std::size_t TokenIndex;
 		std::vector<Token> tokens;
@@ -28,8 +24,8 @@ namespace Serialization {
 			return tokens[curr].t == t;
 		}
 
-		static void report(LogType t, Token tok, const std::string& s) {
-			ParseErrorLogger::instance().log(t, tok, s);
+		static void report(Utils::BitEnum<LogType>& flags, Token tok, const std::string& s) {
+			ParseErrorLogger::instance().log(flags, tok, s);
 			throw std::runtime_error("err");
 		}
 
@@ -58,6 +54,10 @@ namespace Serialization {
 		}
 
 		BaseExpression* primary() {
+			Utils::BitEnum<LogType> log_flags;
+			log_flags |= LogType::SYNTAX;
+			log_flags |= LogType::VITAL;
+
 			if (match({ TOK_NUM, TOK_STRING })) {
 				return new Literal(parser_previous().lit);
 			}
@@ -67,13 +67,13 @@ namespace Serialization {
 				if (match({ TOK_RPAREN })) {
 					return new Grouping(expr);
 				}
-				report(LogType::SYNTAX, parser_peek(), "Missing closing ')'");
+				report(log_flags, parser_peek(), "Missing closing ')'");
 				
 			}
 			if (match({ TOK_LBRAC })) {
 				BaseExpression* arr = array();
 				if (!match({ TOK_RBRAC })) {
-					report(LogType::SYNTAX, parser_peek(), "Missing ']'");
+					report(log_flags, parser_peek(), "Missing ']'");
 					throw std::runtime_error("");
 				}
 				Array* a = (Array*)arr;
@@ -85,7 +85,7 @@ namespace Serialization {
 				if (match({ TOK_RCURL })) {
 					return object;
 				}
-				report(LogType::SYNTAX | LogType::WARNING, parser_peek(), "Missing closing '}'");
+				report(log_flags, parser_peek(), "Missing closing '}'");
 			}
 
 			return nullptr;
@@ -102,12 +102,16 @@ namespace Serialization {
 		};
 		//grouping : $window_width : (a + b) - c,
 		BaseExpression* array() {
+			Utils::BitEnum<LogType> log_flags;
+			log_flags |= LogType::SYNTAX;
+			log_flags |= LogType::VITAL;
+
 			std::vector<BaseExpression*> elems;
 			while (parser_peek().t != TOK_RBRAC && !is_end()) {
 				BaseExpression* e = term();
 				if (parser_peek().t != TOK_RBRAC) {
 					if (!match({ TOK_COMMA })) {
-						report(LogType::SYNTAX, parser_peek(), "Missing , in array");
+						report(log_flags, parser_peek(), "Missing , in array");
 					
 					}
 				}
@@ -115,7 +119,7 @@ namespace Serialization {
 				elems.push_back(e);
 			}
 			if (parser_peek().t == TOK_RBRAC && parser_previous().t == TOK_COMMA) {
-				report(LogType::SYNTAX, parser_peek(), "trailing comma");
+				report(log_flags, parser_peek(), "trailing comma");
 				
 			}
 
@@ -181,7 +185,11 @@ namespace Serialization {
 		}
 
 		BaseStatement* decl() {
+			Utils::BitEnum<LogType> log_flags;
+			log_flags |= LogType::VITAL;
+			log_flags |= LogType::SYNTAX;
 			try {
+				
 				if (match({ TOK_DOLLA })) {
 					std::string key = parser_peek().word;
 					if (match({ TOK_VAR })) {
@@ -189,16 +197,16 @@ namespace Serialization {
 							BaseExpression* v = expression();
 							if (!is_end() && !check(TOK_RCURL)) {
 								if (!match({ TOK_COMMA })) {
-									report(LogType::VITAL | LogType::SYNTAX , parser_peek(), "Missing ',' ");
+									report(log_flags, parser_peek(), "Missing ',' ");
 								}
 							}
 							return new Decl(key, v);
 						}
-						report(LogType::SYNTAX, parser_peek(), "Missing ':' initializer");
+						report(log_flags, parser_peek(), "Missing ':' initializer");
 					}
-					report(LogType::SYNTAX, parser_peek(), "Invalid identifier");
+					report(log_flags, parser_peek(), "Invalid identifier");
 				}
-				report(LogType::SYNTAX, parser_peek(), "Missing '$'");
+				report(log_flags, parser_peek(), "Missing '$'");
 			}
 			catch (std::exception& e) {
 				std::cerr << e.what() << std::endl;

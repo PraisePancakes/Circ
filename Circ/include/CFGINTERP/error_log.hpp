@@ -2,9 +2,11 @@
 #include <iostream>
 #include <vector>
 #include "lexer.hpp"
+#include "utils.hpp"
+
 #define MAX_POOL 15
 namespace Serialization {
-	//convert to bitmask for bitwise or 
+	
 	enum LogType : uint32_t {
 		UNKNOWN = 1 << 0,
 		WARNING = 1 << 1,
@@ -13,19 +15,6 @@ namespace Serialization {
 		VITAL = 1 << 4,
 		ENTRY = 1 << 5
 	};
-
-	constexpr enum LogType operator|(const enum LogType e, const enum LogType i) {
-		return (enum LogType)(uint32_t(e) | uint32_t(i));
-	}
-	constexpr enum LogType operator|=(const enum LogType e, const enum LogType i) {
-		return (enum LogType)(e |= i);
-	}
-	constexpr enum LogType operator&(const enum LogType e, const enum LogType i) {
-		return (enum LogType)(uint32_t(e) & uint32_t(i));
-	}
-	constexpr enum LogType operator&=(const enum LogType e, const enum LogType i) {
-		return (enum LogType)(e &= i);
-	}
 
 	inline static std::vector<std::string> tlookup = {
 		"UNKNOWN",
@@ -58,11 +47,12 @@ namespace Serialization {
 			return cursor;
 		}
 
-		std::string proccess_log_flags(LogType flags) {
+		std::string proccess_log_flags(Serialization::Utils::BitEnum<Serialization::LogType>& f) {
+
 			std::string r = "";
 			for (size_t i = 0; i < tlookup.size(); i++) {
 				LogType set_bit = (LogType)(1 << i);
-				if (flags & set_bit) {
+				if (f & set_bit) {
 					r += (tlookup[i]);
 					r += ", ";
 				}
@@ -71,9 +61,9 @@ namespace Serialization {
 			return r;
 		}
 
-		void log(LogType flags, Token t, const std::string& desc) {
+		void log(Serialization::Utils::BitEnum<Serialization::LogType>& f, Token t, const std::string& desc) {
 			if (cursor >= MAX_POOL) cursor = 0;
-			std::string log_type = proccess_log_flags(flags);
+			std::string log_type = proccess_log_flags(f);
 			std::string line = std::to_string(t.line);
 			std::string where = std::to_string(t.where);
 			std::string word = t.word;

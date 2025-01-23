@@ -15,13 +15,13 @@ void CustomLog(int msgType, const char* text, va_list args)
 */
 
 int main() {
-    std::initializer_list<std::string> key_path = {"a", "t"};
+    std::initializer_list<std::string> key_path = { "a", "t" };
     SetTraceLogCallback(CustomLog);
     Circ::CFGLoader cfgl(cfg_path);
     cfgl.CFGAttrCreate(key_path, 6);
     cfgl.CFGAttrCreate({ "a", "b" }, 2);
     cfgl.Serialize();
-   
-   
+
+
     return 0;
 }

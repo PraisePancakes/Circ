@@ -62,5 +62,8 @@
     <ClInclude Include="Circ\include\debug.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Circ\include\CFGINTERP\utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
