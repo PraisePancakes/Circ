@@ -1,4 +1,4 @@
-# CIRC : A raylib-compatible serialization framework.
+# CIRC : A text-based serialization framework.
 **v0.0.1-alpha**
 ## Why?
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Programming advanced graphical applications can be very messy. Let's clean that up a little. With Circ, you can keep all your environment variables (objects, int, string, etc..) in a separate file and just look up these constants using the Circ config loader API!
@@ -116,10 +116,9 @@ That's it! Well... for now, I am still working hard every day to better this pro
 ### IN THE WORKS 
  1. Using variable substitution for values.
  2. Multi-file modules
- 3. Keywords and API functions that incorporate Raylib.
  4. One-step array retrieval.
  5. Serialization formatting.
  6. More types!
 
 ## Building
-This project is built using CMake on MSVS2022, ISO C++20 Standard, with the latest version of Raylib. 
+This project is built using CMake on MSVS2022, ISO C++20 Standard
