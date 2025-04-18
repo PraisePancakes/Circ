@@ -11,10 +11,10 @@ namespace Serialization {
 		class Lexer {
 			std::vector<Token> tokens;
 			std::string contents;
-			int start = 0;
-			int end = 0;
-			int line = 1;
-			int pos = 0;
+			size_t start = 0;
+			size_t end = 0;
+			size_t line = 1;
+			size_t pos = 0;
 			friend class Interpreter;
 
 			bool is_end() const {
@@ -110,9 +110,7 @@ namespace Serialization {
 			void lex_var() {
 
 				while (!is_end() && (isalnum(peek()) || peek() == '_')) {
-
-					char c = advance();
-
+					advance();
 				};
 
 				add_token(TOK_VAR);
@@ -253,9 +251,9 @@ namespace Serialization {
 					std::clog << "cfg file opened" << std::endl;
 #endif
 				}
-				std::string line;
-				while (std::getline(stream, line)) {
-					contents += line + '\n';
+				std::string l = "";
+				while (std::getline(stream, l)) {
+					contents += l + '\n';
 				};
 
 				lex();

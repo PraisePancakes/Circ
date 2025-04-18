@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <iostream>
+
 #define CLU_SIZE 9
 namespace Serialization {
 	enum TokenType {
@@ -33,11 +34,11 @@ namespace Serialization {
 
 	struct Token {
 		std::string word;
-		int line;
-		int where;
+		size_t line;
+		size_t where;
 		TokenType t;
 		std::any lit;
-		Token(const std::string& w, int l, int where, TokenType t, std::any lit) : word(w), line(l), where(where), t(t), lit(lit) {};
+		Token(const std::string& w, size_t l, size_t where, TokenType t, std::any lit) : word(w), line(l), where(where), t(t), lit(lit) {};
 		~Token() {};
 	};
 

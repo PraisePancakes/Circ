@@ -51,6 +51,7 @@ namespace Serialization {
 					return left * right;
 				case TOK_MOD:
 					return (int)left % (int)right;
+				default:break;
 				};
 				throw std::runtime_error("Serialization::Internal::BDouble policy operate.");
 			};
@@ -74,6 +75,7 @@ namespace Serialization {
 					return left * right;
 				case TOK_MOD:
 					return (int)left % (int)right;
+				default:break;
 
 				};
 				throw std::runtime_error("Serialization::Internal::BInt policy failed to operate.");

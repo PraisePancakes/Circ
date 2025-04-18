@@ -1,5 +1,4 @@
 #pragma once
-#include <raylib.h>
 #include <iostream>
 #include <vector>
 #include "CFGINTERP/archive.hpp"
@@ -116,18 +115,15 @@ namespace Circ {
 
         template<typename WrapperType>
         WrapperType CFGAttr(std::initializer_list<std::string> key_path) {
-            WrapperType ret;
+            WrapperType ret{};
             try {
                 ret = arc->Get<WrapperType>(key_path);
-                return ret;
+               
             }
             catch (std::exception& e) {
                 std::cerr << e.what() << std::endl;
             }
-            catch (std::bad_any_cast& e) {
-                std::cerr << e.what() << std::endl;
-            }
-           
+            return ret;
         }
 
         ~CFGLoader() {

@@ -43,6 +43,8 @@ namespace Serialization {
 					case TOK_LBRAC:
 						ret += '\n';
 						ret += fmt_array();
+						break;
+					default:break;
 					}
 				}
 
@@ -75,6 +77,7 @@ namespace Serialization {
 				case TOK_LBRAC:
 					ret += fmt_array();
 					break;
+				default:break;
 				}
 
 				ret += advance().word;
@@ -83,7 +86,7 @@ namespace Serialization {
 				return ret;
 			};
 
-			inline std::string do_circ_fmt(const TokenVector& ref) noexcept {
+			inline std::string do_circ_fmt() noexcept {
 				std::string fmt = "";
 				while (!is_end()) {
 					fmt += fmt_var();
@@ -130,7 +133,7 @@ namespace Serialization {
 
 			inline std::string operator()(const TokenVector& ref_to_fmt) {
 				toks = ref_to_fmt;
-				return do_circ_fmt(ref_to_fmt);
+				return do_circ_fmt();
 			};
 		};
 
